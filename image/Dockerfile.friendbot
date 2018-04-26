@@ -1,4 +1,4 @@
-FROM golang:1.10.0-alpine
+FROM golang:1.10-alpine
 
 ENV FRIENDBOT_VERSION 36bb4843f4732ba74925176b14612efde6ab6a3b
 
@@ -19,7 +19,7 @@ RUN apk add -qU --no-cache -t .fetch-deps curl tar git mercurial \
     && go build -o friendbot main.go init_friendbot.go \
     && mv friendbot /usr/local/bin/ \
     && cd / \
-    && rm -rf /go/src/github.com/stellar/go \
+    && rm -rf /go/src/github.com \
     && apk del -q .fetch-deps
 
 # envsubst
