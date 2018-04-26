@@ -120,3 +120,11 @@ services:
       options:
         max-size: 100m
         max-file: "3"
+
+  stellar-archivist:
+    image: kinfoundation/stellar-archivist
+    build:
+      dockerfile: Dockerfile.stellar-archivist
+      context: .
+    volumes:
+      - ./stellar-archivist/opt/stellar-archivist:/opt/stellar-archivist
