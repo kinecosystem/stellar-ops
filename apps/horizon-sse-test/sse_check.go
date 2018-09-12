@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -17,18 +18,23 @@ import (
 	sse "github.com/r3labs/sse"
 )
 
-var accounts = make(map[string]string, 0)
-var addresses = make([]string, 0)
-var SEED_FUNDER = "SDBDJVXHPVQGDXYHEVOBBV4XZUDD7IQTXM5XHZRLXRJVY5YMH4YUCNZC"
-var ADDRESS_FUNDER = "GCLBBAIDP34M4JACPQJUYNSPZCQK7IRHV7ETKV6U53JPYYUIIVDVJJFQ"
-var INITIAL_FUND = "10"
-var HORIZON_URL = "10.0.2.2:8000"
-var NETWORK = "private testnet"
-var MAX_OP_TO_TX = 90
-var sse_channels = make(map[string]chan interface{}, 0)
+var (
+	seed       = flag.String("funder", "", "funder seed")
+	amount     = flag.String("amount", "", "initial fund amount")
+	horizon    = flag.String("horizon", "", "horizon url")
+	passphrase = flag.String("passphrase", "", "network passhprase")
+	ops        = flag.Uint("ops", "", "maximum operations per transaction")
+	accounts   = flag.Uint("accounts", "", "accounts to create and use in test")
+
+	accounts     = make(map[string]string, 0)
+	addresses    = make([]string, 0)
+	sse_channels = make(map[string]chan interface{}, 0)
+)
 
 func main() {
-	createAccounts(500)
+	flag.Parse()
+
+	generateAccounts(*accounts)
 	submitCreateAccounts()
 	//checkSSEWithAdhocConnctions()
 	checkSSEWithConstantConnections()
@@ -135,7 +141,7 @@ func checkSSEOnPayment(sender int) {
 	wg.Wait()
 }
 
-func createAccounts(num int) {
+func generateAccounts(num int) {
 	for i := 0; i < num; i++ {
 		kp, err := keypair.Random()
 		if err != nil {
@@ -147,7 +153,7 @@ func createAccounts(num int) {
 }
 
 func getSequence(address string) uint64 {
-	url := fmt.Sprintf("http://%s/accounts/%s", HORIZON_URL, address)
+	url := fmt.Sprintf("http://%s/accounts/%s", horizon, address)
 	resp, err := retryablehttp.Get(url)
 	if err != nil {
 		panic(err)
@@ -176,13 +182,19 @@ func min(x int, y int) int {
 	}
 }
 
-func submitCreateAccounts() {
+func submitCreateAccounts(funderAddr string) {
 	for i := 0; i < len(addresses); {
-		seq := getSequence(ADDRESS_FUNDER) + 1
-		args := []b.TransactionMutator{b.Network{NETWORK}, b.SourceAccount{ADDRESS_FUNDER}, b.Sequence{seq}}
+		seq := getSequence(funderAddr) + 1
+
+		args := []b.TransactionMutator{
+			b.Network{passphrase},
+			b.SourceAccount{funderAddr},
+			b.Sequence{seq}}
+
 		remaining := len(addresses) - i
-		for j := 0; j < min(remaining, MAX_OP_TO_TX); j, i = j+1, i+1 {
-			op := b.CreateAccount(b.Destination{addresses[i]}, b.NativeAmount{INITIAL_FUND})
+
+		for j := 0; j < min(remaining, ops); j, i = j+1, i+1 {
+			op := b.CreateAccount(b.Destination{addresses[i]}, b.NativeAmount{amount})
 			args = append(args, op)
 		}
 		tx, err := b.Transaction(args...)
@@ -190,7 +202,7 @@ func submitCreateAccounts() {
 			panic(err)
 		}
 
-		txe, err := tx.Sign(SEED_FUNDER)
+		txe, err := tx.Sign(seed)
 		if err != nil {
 			panic(err)
 		}
@@ -200,7 +212,7 @@ func submitCreateAccounts() {
 			panic(err)
 		}
 
-		tx_url := fmt.Sprintf("http://%s/transactions", HORIZON_URL)
+		tx_url := fmt.Sprintf("http://%s/transactions", horizon)
 		form := url.Values{"tx": []string{txeB64}}
 		resp, err := http.PostForm(tx_url, form)
 		resp.Close = true
@@ -220,7 +232,7 @@ func submitCreateAccounts() {
 }
 
 func sendPayment(xdr string) {
-	tx_url := fmt.Sprintf("http://%s/transactions", HORIZON_URL)
+	tx_url := fmt.Sprintf("http://%s/transactions", horizon)
 	form := url.Values{"tx": []string{xdr}}
 	resp, err := retryablehttp.PostForm(tx_url, form)
 	if err != nil {
@@ -243,7 +255,7 @@ func createPayment(sender string, receiver string, amount int) (xdr string, hash
 	seed := accounts[sender]
 	seq := getSequence(sender) + 1
 	//fmt.Println(seq)
-	tx, err := b.Transaction(b.SourceAccount{sender}, b.Sequence{seq}, b.Network{NETWORK},
+	tx, err := b.Transaction(b.SourceAccount{sender}, b.Sequence{seq}, b.Network{passphrase},
 		b.Payment(
 			b.Destination{receiver},
 			b.NativeAmount{strconv.Itoa(amount)},
@@ -276,7 +288,7 @@ func createPayment(sender string, receiver string, amount int) (xdr string, hash
 
 func watchAccount(account string, watch_channel chan interface{}) {
 	fmt.Println("Watching ", account)
-	client := sse.NewClient(fmt.Sprintf("http://%s/accounts/%s/transactions?cursor=now", HORIZON_URL, account))
+	client := sse.NewClient(fmt.Sprintf("http://%s/accounts/%s/transactions?cursor=now", horizon, account))
 
 	events := make(chan *sse.Event)
 
@@ -297,7 +309,7 @@ func watchAccount(account string, watch_channel chan interface{}) {
 
 func watchAccountForTrasnaction(account string, hash string, timeout int) {
 	fmt.Println("Watching ", account, " : ", hash)
-	client := sse.NewClient(fmt.Sprintf("http://%s/accounts/%s/transactions?cursor=now", HORIZON_URL, account))
+	client := sse.NewClient(fmt.Sprintf("http://%s/accounts/%s/transactions?cursor=now", horizon, account))
 
 	events := make(chan *sse.Event)
 
