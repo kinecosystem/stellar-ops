@@ -1,0 +1,10 @@
+package: .
+import:
+- package: github.com/hashicorp/go-retryablehttp
+- package: github.com/kinecosystem/go
+  version: kinecosystem/master
+  subpackages:
+  - build
+  - clients/horizon
+  - keypair
+- package: github.com/r3labs/sse
