@@ -25,8 +25,6 @@ var (
 	passphraseFlag = flag.String("passphrase", "", "network passhprase")
 	opsFlag        = flag.Int("ops", 1, "maximum operations per transaction")
 	accountsFlag   = flag.Int("accounts", 1, "accounts to create and use in test")
-
-	sseChans = make(map[string]chan interface{}, 0)
 )
 
 func main() {
@@ -119,24 +117,13 @@ func submitCreateAccounts(client *horizon.Client, accounts map[string]string, ad
 	}
 }
 
-// func checkSSEWithAdhocConnections(client *horizon.Client, passphrase string, addresses []string) {
-//	wg := new(sync.WaitGroup)
-//	wg.Add(299)
-//	for i := 0; i < 300; i++ {
-//		go func(sender int) {
-//			defer wg.Done()
-//			checkSSEOnPayment(client, passphrase, addresses, i)
-//		}(i)
-//		time.Sleep(4 * time.Millisecond)
-//	}
-//	wg.Wait()
-// }
-
 func checkSSEWithConstantConnections(client *horizon.Client, passphrase string, addresses []string) {
+	sseWatchChans := make(map[string]chan interface{}, len(addresses))
+
 	// create connections to all addresses
 	for i := 0; i < len(addresses); i++ {
 		watchChan := make(chan interface{})
-		sseChans[addresses[i]] = watchChan
+		sseWatchChans[addresses[i]] = watchChan
 
 		kp := keypair.MustParse(addresses[i])
 		go func(address string, channel chan interface{}) {
@@ -146,113 +133,13 @@ func checkSSEWithConstantConnections(client *horizon.Client, passphrase string, 
 		time.Sleep(4 * time.Millisecond)
 	}
 
-	runTestBulk(client, passphrase, addresses, 100)
+	runTestBulk(client, passphrase, addresses, sseWatchChans, 100)
 	time.Sleep(20 * time.Second)
 
-	runTestBulk(client, passphrase, addresses, 200)
+	runTestBulk(client, passphrase, addresses, sseWatchChans, 200)
 	time.Sleep(20 * time.Second)
 
-	runTestBulk(client, passphrase, addresses, 300)
-}
-
-func runTestBulk(client *horizon.Client, passphrase string, addresses []string, count int) {
-	var wg sync.WaitGroup
-	wg.Add(count)
-	for i := 0; i < count; i++ {
-		go func(sender int) {
-			defer wg.Done()
-			checkSSEOnPaymentConstant(client, passphrase, addresses, i)
-		}(i)
-
-		time.Sleep(4 * time.Millisecond)
-	}
-
-	wg.Wait()
-
-	log.Println("Finished bulk successfully")
-}
-
-func listenToHash(hash string, channel chan interface{}, wg *sync.WaitGroup) {
-	defer wg.Done()
-	select {
-	case msg := <-channel:
-		if msg == hash {
-			fmt.Println("Matched ", hash)
-			return
-		}
-	case <-time.After(30 * time.Second):
-		fmt.Println("ERROR: missing event for hash: ", hash)
-		return
-	}
-}
-
-func checkSSEOnPaymentConstant(client *horizon.Client, passphrase string, addresses []string, sender int) {
-	rand.Seed(time.Now().UnixNano())
-	receiver := rand.Intn(len(addresses))
-	if sender == receiver {
-		receiver = rand.Intn(len(addresses))
-	}
-
-	txEnvB64, hash := generatePayment(client, passphrase, addresses[sender], addresses[receiver], "1")
-
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	go listenToHash(hash, sseChans[addresses[sender]], &wg)
-	go listenToHash(hash, sseChans[addresses[receiver]], &wg)
-
-Retry:
-	for i := 0; i < 5; i++ {
-		_, err := client.SubmitTransaction(txEnvB64)
-		if err == nil {
-			break Retry
-		}
-
-		logTxErrorResultCodes(err)
-		if i == 4 {
-			return
-		}
-	}
-
-	wg.Wait()
-
-}
-
-func checkSSEOnPayment(client *horizon.Client, passphrase string, addresses []string, sender int) {
-	rand.Seed(time.Now().UnixNano())
-	receiver := rand.Intn(len(addresses))
-	if sender == receiver {
-		receiver = rand.Intn(len(addresses))
-	}
-
-	txEnvB64, hash := generatePayment(client, passphrase, addresses[sender], addresses[receiver], "1")
-
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	go func(senderAddress string, wg *sync.WaitGroup, hash string) {
-		defer wg.Done()
-		watchAccountForTransaction(client.URL, senderAddress, hash, 25)
-	}(addresses[sender], &wg, hash)
-
-	//	time.Sleep(10 * time.Millisecond)
-
-	go func(receiverAddress string, wg *sync.WaitGroup, hash string) {
-		defer wg.Done()
-		watchAccountForTransaction(client.URL, receiverAddress, hash, 25)
-	}(addresses[receiver], &wg, hash)
-
-Retry:
-	for j := 0; j < 5; j++ {
-		_, err := client.SubmitTransaction(txEnvB64)
-		if err == nil {
-			break Retry
-		}
-
-		logTxErrorResultCodes(err)
-	}
-
-	wg.Wait()
+	runTestBulk(client, passphrase, addresses, sseWatchChans, 300)
 }
 
 func watchAccount(horizon, account string, watchChan chan<- interface{}) {
@@ -273,32 +160,145 @@ func watchAccount(horizon, account string, watchChan chan<- interface{}) {
 	}
 }
 
-func watchAccountForTransaction(horizon, account, hash string, timeout int) {
-	fmt.Println("Watching ", account, " : ", hash)
-	client := sse.NewClient(fmt.Sprintf("%s/accounts/%s/transactions?cursor=now", horizon, account))
+func runTestBulk(client *horizon.Client, passphrase string, addresses []string, sseWatchChans map[string]chan interface{}, count int) {
+	var wg sync.WaitGroup
+	wg.Add(count)
+	for i := 0; i < count; i++ {
+		go func(sender int) {
+			defer wg.Done()
+			checkSSEOnPaymentConstant(client, passphrase, addresses, sseWatchChans, i)
+		}(i)
 
-	events := make(chan *sse.Event)
+		time.Sleep(4 * time.Millisecond)
+	}
 
-	client.SubscribeChan("messages", events)
-	for {
-		select {
-		case msg := <-events:
-			var raw map[string]interface{}
-			err := json.Unmarshal(msg.Data, &raw)
-			if err == nil {
-				if raw["hash"] == hash {
-					fmt.Println("Match ", hash)
-					return
-				} else if raw["hash"] != nil {
-					fmt.Println("Listening to ", account, ", hash: ", hash, " got ", raw["hash"])
-				}
-			}
-		case <-time.After(time.Duration(timeout) * time.Second):
-			fmt.Println("ERROR: missing event for ", account, ", hash: ", hash)
+	wg.Wait()
+
+	log.Println("Finished bulk successfully")
+}
+
+func checkSSEOnPaymentConstant(client *horizon.Client, passphrase string, addresses []string, sseWatchChans map[string]chan interface{}, sender int) {
+	rand.Seed(time.Now().UnixNano())
+	receiver := rand.Intn(len(addresses))
+	if sender == receiver {
+		receiver = rand.Intn(len(addresses))
+	}
+
+	txEnvB64, hash := generatePayment(client, passphrase, addresses[sender], addresses[receiver], "1")
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go listenToHash(hash, sseWatchChans[addresses[sender]], &wg)
+	go listenToHash(hash, sseWatchChans[addresses[receiver]], &wg)
+
+Retry:
+	for i := 0; i < 5; i++ {
+		log.Printf("retry %d from %s to %s\n", i, addresses[sender], addresses[receiver])
+		_, err := client.SubmitTransaction(txEnvB64)
+		if err == nil {
+			break Retry
+		}
+
+		logTxErrorResultCodes(err)
+		if i == 4 {
 			return
 		}
 	}
+
+	wg.Wait()
+
 }
+
+func listenToHash(hash string, watchChan <-chan interface{}, wg *sync.WaitGroup) {
+	defer wg.Done()
+	select {
+	case msg := <-watchChan:
+		if msg == hash {
+			fmt.Println("Matched ", hash)
+			return
+		}
+	case <-time.After(30 * time.Second):
+		fmt.Println("ERROR: missing event for hash: ", hash)
+		return
+	}
+}
+
+// func checkSSEWithAdhocConnections(client *horizon.Client, passphrase string, addresses []string) {
+//	wg := new(sync.WaitGroup)
+//	wg.Add(299)
+//	for i := 0; i < 300; i++ {
+//		go func(sender int) {
+//			defer wg.Done()
+//			checkSSEOnPayment(client, passphrase, addresses, i)
+//		}(i)
+//		time.Sleep(4 * time.Millisecond)
+//	}
+//	wg.Wait()
+// }
+
+//func checkSSEOnPayment(client *horizon.Client, passphrase string, addresses []string, sender int) {
+//	rand.Seed(time.Now().UnixNano())
+//	receiver := rand.Intn(len(addresses))
+//	if sender == receiver {
+//		receiver = rand.Intn(len(addresses))
+//	}
+
+//	txEnvB64, hash := generatePayment(client, passphrase, addresses[sender], addresses[receiver], "1")
+
+//	var wg sync.WaitGroup
+//	wg.Add(2)
+
+//	go func(senderAddress string, wg *sync.WaitGroup, hash string) {
+//		defer wg.Done()
+//		watchAccountForTransaction(client.URL, senderAddress, hash, 25)
+//	}(addresses[sender], &wg, hash)
+
+//	//	time.Sleep(10 * time.Millisecond)
+
+//	go func(receiverAddress string, wg *sync.WaitGroup, hash string) {
+//		defer wg.Done()
+//		watchAccountForTransaction(client.URL, receiverAddress, hash, 25)
+//	}(addresses[receiver], &wg, hash)
+
+//Retry:
+//	for j := 0; j < 5; j++ {
+//		_, err := client.SubmitTransaction(txEnvB64)
+//		if err == nil {
+//			break Retry
+//		}
+
+//		logTxErrorResultCodes(err)
+//	}
+
+//	wg.Wait()
+//}
+
+// func watchAccountForTransaction(horizon, account, hash string, timeout int) {
+// 	fmt.Println("Watching ", account, " : ", hash)
+// 	client := sse.NewClient(fmt.Sprintf("%s/accounts/%s/transactions?cursor=now", horizon, account))
+
+// 	events := make(chan *sse.Event)
+
+// 	client.SubscribeChan("messages", events)
+// 	for {
+// 		select {
+// 		case msg := <-events:
+// 			var raw map[string]interface{}
+// 			err := json.Unmarshal(msg.Data, &raw)
+// 			if err == nil {
+// 				if raw["hash"] == hash {
+// 					fmt.Println("Match ", hash)
+// 					return
+// 				} else if raw["hash"] != nil {
+// 					fmt.Println("Listening to ", account, ", hash: ", hash, " got ", raw["hash"])
+// 				}
+// 			}
+// 		case <-time.After(time.Duration(timeout) * time.Second):
+// 			fmt.Println("ERROR: missing event for ", account, ", hash: ", hash)
+// 			return
+// 		}
+// 	}
+// }
 
 func generatePayment(client *horizon.Client, passphrase, sender, receiver, amount string) (string, string) {
 	tx, err := b.Transaction(
@@ -355,6 +355,8 @@ func logTxErrorResultCodes(err error) *horizon.TransactionResultCodes {
 		}
 
 		return code
+	default:
+		log.Println("couldn't parse transaction error object")
 	}
 	return nil
 }
