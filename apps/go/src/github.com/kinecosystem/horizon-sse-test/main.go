@@ -178,11 +178,11 @@ func runTestBulk(client *horizon.Client, passphrase string, addresses []string, 
 }
 
 func checkSSEOnPaymentConstant(client *horizon.Client, passphrase string, addresses []string, sseWatchChans map[string]chan interface{}, sender int) {
+	// Filter sender from addresses
+	// and randomly pick receiver address from remaining addresses
+	receivers := append(addresses[:sender], addresses[sender+1:]...)
 	rand.Seed(time.Now().UnixNano())
-	receiver := rand.Intn(len(addresses))
-	if sender == receiver {
-		receiver = rand.Intn(len(addresses))
-	}
+	receiver := rand.Intn(len(receivers))
 
 	txEnvB64, hash := generatePayment(client, passphrase, addresses[sender], addresses[receiver], "1")
 
