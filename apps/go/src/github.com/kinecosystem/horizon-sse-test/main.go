@@ -193,7 +193,7 @@ func checkSSEOnPaymentConstant(client *horizon.Client, passphrase string, addres
 
 Retry:
 	for i := 0; i < 5; i++ {
-		log.Printf("retry %d from %s to %s\n", i, addresses[sender], addresses[receiver])
+		log.Printf("retry %d from %s to %s\n", i, keypair.MustParse(addresses[sender]).Address(), keypair.MustParse(addresses[receiver]).Address())
 		_, err := client.SubmitTransaction(txEnvB64)
 		if err == nil {
 			break Retry
@@ -206,7 +206,6 @@ Retry:
 	}
 
 	wg.Wait()
-
 }
 
 func listenToHash(hash string, watchChan <-chan interface{}, wg *sync.WaitGroup) {
@@ -214,11 +213,11 @@ func listenToHash(hash string, watchChan <-chan interface{}, wg *sync.WaitGroup)
 	select {
 	case msg := <-watchChan:
 		if msg == hash {
-			fmt.Println("Matched ", hash)
+			log.Printf("Matched %s\n", hash)
 			return
 		}
 	case <-time.After(30 * time.Second):
-		fmt.Println("ERROR: missing event for hash: ", hash)
+		log.Printf("ERROR: missing event for hash: %s\n", hash)
 		return
 	}
 }
@@ -335,7 +334,7 @@ func generatePayment(client *horizon.Client, passphrase, sender, receiver, amoun
 		return "", ""
 	}
 
-	log.Printf("send from %s to %s: %s\b", sender, receiver, hash)
+	log.Printf("send from %s to %s: %s\n", keypair.MustParse(sender).Address(), keypair.MustParse(receiver).Address(), hash)
 
 	return txEnvB64, hash
 }
