@@ -16,6 +16,9 @@ import (
 	"github.com/r3labs/sse"
 )
 
+// Account holds information for a test account used for sending / receiving transactions
+// and tracking whether these transactions where published on an SSE stream listening for changes
+// related to that account.
 type Account struct {
 	KP *keypair.Full
 
@@ -23,10 +26,15 @@ type Account struct {
 	Txs sync.Map
 }
 
+// Accounts holds all test accounts.
 type Accounts map[string]*Account
 
 const (
-	ClientTimeout          = 30 * time.Second
+	ClientTimeout = 30 * time.Second
+
+	// Accounts to pick from when deciding on a transaction recipient.
+	// This is required for making sure we test sending multiple transactions to the same recipient,
+	// by drawing from a small pool of possibile recipient accounts.
 	possibleReceiverAmount = 30
 )
 
@@ -42,6 +50,7 @@ var (
 func main() {
 	flag.Parse()
 
+	// Generate and  create accounts
 	accounts := generateAccounts(*accountsFlag)
 
 	client := horizon.Client{
@@ -51,7 +60,7 @@ func main() {
 
 	submitCreateAccounts(&client, accounts, *funderFlag, *amountFlag, *opsFlag)
 
-	checkSSEWithConstantConnections(&client, *passphraseFlag, accounts)
+	runTests(&client, *passphraseFlag, accounts)
 
 	log.Println("Done!")
 }
@@ -134,13 +143,11 @@ func submitCreateAccounts(client *horizon.Client, accounts Accounts, funderSeed,
 	}
 }
 
-func checkSSEWithConstantConnections(client *horizon.Client, passphrase string, accounts Accounts) {
-	events := make(map[string]chan interface{}, len(accounts))
-
-	// create connections to all addresses
+func runTests(client *horizon.Client, passphrase string, accounts Accounts) {
+	// Create SSE stream connections for all accounts,
+	// tracking events related to them.
 	for _, acc := range accounts {
 		accEvents := make(chan interface{}, 500)
-		events[acc.KP.Address()] = accEvents
 
 		go func(acc *Account, channel chan interface{}) {
 			watchAccount(client.URL, acc, accEvents)
@@ -149,37 +156,41 @@ func checkSSEWithConstantConnections(client *horizon.Client, passphrase string, 
 		time.Sleep(4 * time.Millisecond)
 	}
 
-	// all txs should be confirmed in 1 block
+	// All txs should be confirmed in 1 block.
 	log.Println("-------------- BULK 1")
-	success := runTestBulk(client, passphrase, accounts, events, 100)
+	success := runTest(client, passphrase, accounts, 100)
 	if !success {
 		return
 	}
 	cleanTxs(accounts)
 	time.Sleep(20 * time.Second)
 
-	// all txs should be confirmed in 2 blocks
+	// All txs should be confirmed in 2 blocks.
 	log.Println("-------------- BULK 2")
-	success = runTestBulk(client, passphrase, accounts, events, 200)
+	success = runTest(client, passphrase, accounts, 200)
 	if !success {
 		return
 	}
 	cleanTxs(accounts)
 	time.Sleep(20 * time.Second)
 
-	// all txs should be confirmed in 3 blocks
+	// All txs should be confirmed in 3 blocks.
 	log.Println("-------------- BULK 3")
-	success = runTestBulk(client, passphrase, accounts, events, 300)
+	success = runTest(client, passphrase, accounts, 300)
 	if !success {
 		return
 	}
 	cleanTxs(accounts)
 	time.Sleep(20 * time.Second)
 
+	// All txs should be confirmed in 5 blocks.
 	log.Println("-------------- BULK 4")
-	runTestBulk(client, passphrase, accounts, events, 500)
+	runTest(client, passphrase, accounts, 500)
 }
 
+// watchAccount creates an SSE stream connection for given account.
+// That accounts sends transactions, and we track we receive SSE events related to these
+// transactions.
 func watchAccount(horizon string, sender *Account, accEvents chan<- interface{}) {
 	log.Printf("Watching %s\n", sender.KP.Address())
 
@@ -196,6 +207,7 @@ func watchAccount(horizon string, sender *Account, accEvents chan<- interface{})
 				if raw["hash"] != nil { // TODO what happens if it's nil?
 					log.Printf("sse published to account %s tx hash %s", sender.KP.Address(), raw["hash"])
 
+					// Update transaction tracking, and set the transaction as one that got an SSE event.
 					sender.Txs.Store(raw["hash"], true)
 				} else {
 					log.Println(raw)
@@ -205,7 +217,7 @@ func watchAccount(horizon string, sender *Account, accEvents chan<- interface{})
 	}
 }
 
-func runTestBulk(client *horizon.Client, passphrase string, accounts Accounts, events map[string]chan interface{}, count int) bool {
+func runTest(client *horizon.Client, passphrase string, accounts Accounts, count int) bool {
 	// Set a small amount of possible receivers,
 	// so that multiple txs (and thus SSE events) will be sent to them
 	var receivers []*Account
@@ -219,12 +231,12 @@ func runTestBulk(client *horizon.Client, passphrase string, accounts Accounts, e
 	}
 
 	// Initialize tx envelopes for submission,
-	// along with tx hash test map for verification at the end
+	// along with tx hash test map for verification at the end.
 	txs := make(map[string]string) // TxHash : TxEnvB64
 	c := 0
 	for _, sender := range accounts {
 
-		// Generate transaction as well as its extract hash
+		// Generate transaction as well as its extract hash.
 		receiver, hash, txEnvB64 := generatePayment(client, passphrase, receivers, sender, "1")
 		txs[hash] = txEnvB64
 
@@ -239,6 +251,7 @@ func runTestBulk(client *horizon.Client, passphrase string, accounts Accounts, e
 		}
 	}
 
+	// Submit all txs.
 	var wg sync.WaitGroup
 	wg.Add(count)
 	c = 0
@@ -258,11 +271,11 @@ func runTestBulk(client *horizon.Client, passphrase string, accounts Accounts, e
 
 	wg.Wait()
 
-	// sleep how many blocks is required for all transactions to be processed
+	// Sleep how many blocks is required for all transactions to be processed
 	// e.g. 200 requires 2 blocks (because we set 100 txs / block)
-	// we also wait an extra block just in case
+	// we also wait an extra block just in case.
 	//
-	// so in the above example we'll wait 3 blocks
+	// So in the above example we'll wait 3 blocks.
 	time.Sleep(time.Duration(((5*count)/100)+5) * time.Second)
 
 	res := testAllTxsPublished(accounts)
@@ -360,6 +373,8 @@ func generatePayment(client *horizon.Client, passphrase string, receivers []*Acc
 	return receiver, hash, txEnvB64
 }
 
+// cleanTxs cleans all tracked transactions in all Account.TXs members,
+// making it ready for the next test.
 func cleanTxs(accounts Accounts) {
 	for _, acc := range accounts {
 		acc.Txs.Range(func(hash, _ interface{}) bool {
@@ -388,12 +403,4 @@ func logTxErrorResultCodes(err error) *horizon.TransactionResultCodes {
 		log.Println("couldn't parse transaction error object")
 	}
 	return nil
-}
-
-func min(x int, y int) int {
-	if x > y {
-		return y
-	} else {
-		return x
-	}
 }
