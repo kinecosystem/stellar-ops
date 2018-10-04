@@ -231,6 +231,7 @@ func runTestBulk(client *horizon.Client, passphrase string, accounts Accounts, e
 		// Initialize tx hash as "not yet published".
 		log.Printf("Watching tx %d from %s to %s with tx hash %s\n", c+1, sender.KP.Address(), receiver.KP.Address(), hash)
 		accounts[sender.KP.Address()].Txs.Store(hash, false)
+		accounts[receiver.KP.Address()].Txs.Store(hash, false)
 
 		c++
 		if c >= count {
