@@ -25,7 +25,10 @@ type Account struct {
 
 type Accounts map[string]*Account
 
-const ClientTimeout = 30 * time.Second
+const (
+	ClientTimeout          = 30 * time.Second
+	possibleReceiverAmount = 30
+)
 
 var (
 	funderFlag     = flag.String("funder", "", "funder seed")
@@ -203,6 +206,18 @@ func watchAccount(horizon string, sender *Account, accEvents chan<- interface{})
 }
 
 func runTestBulk(client *horizon.Client, passphrase string, accounts Accounts, events map[string]chan interface{}, count int) bool {
+	// Set a small amount of possible receivers,
+	// so that multiple txs (and thus SSE events) will be sent to them
+	var receivers []*Account
+	i := 0
+	for _, acc := range accounts {
+		receivers = append(receivers, acc)
+		if i > possibleReceiverAmount {
+			break
+		}
+		i++
+	}
+
 	// Initialize tx envelopes for submission,
 	// along with tx hash test map for verification at the end
 	txs := make(map[string]string) // TxHash : TxEnvB64
@@ -210,7 +225,7 @@ func runTestBulk(client *horizon.Client, passphrase string, accounts Accounts, e
 	for _, sender := range accounts {
 
 		// Generate transaction as well as its extract hash
-		receiver, hash, txEnvB64 := generatePayment(client, passphrase, accounts, sender, "1")
+		receiver, hash, txEnvB64 := generatePayment(client, passphrase, receivers, sender, "1")
 		txs[hash] = txEnvB64
 
 		// Initialize tx hash as "not yet published".
@@ -288,15 +303,22 @@ func testAllTxsPublished(accounts Accounts) bool {
 	return res
 }
 
-func generatePayment(client *horizon.Client, passphrase string, accounts Accounts, sender *Account, amount string) (*Account, string, string) {
-	// Filter sender from addresses
-	// and randomly pick receiver address from remaining addresses
-	var receivers []*Account
-	for _, acc := range accounts {
-		if acc.KP.Address() != sender.KP.Address() {
-			receivers = append(receivers, acc)
+func generatePayment(client *horizon.Client, passphrase string, receivers []*Account, sender *Account, amount string) (*Account, string, string) {
+	// Filter sender from addresses if present.
+	x := -1
+	for i, acc := range receivers {
+		if acc.KP.Address() == sender.KP.Address() {
+			x = i
+			break
 		}
 	}
+	filtered := append([]*Account(nil), receivers...)
+	if x != -1 {
+		filtered = append(filtered[:x], filtered[:x+1]...)
+
+	}
+
+	// Randomly pick receiver address from remaining addresses.
 	rand.Seed(time.Now().UnixNano())
 	receiver := receivers[rand.Intn(len(receivers))]
 
