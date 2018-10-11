@@ -1,4 +1,4 @@
-# Kin Federation Nodes 6
+# Kin Federation Nodes 5
 
 This folder contains documentation related to setting up and maintaining a ***BASIC*** Kin blockchain federation node containing both Core and Horizon, more complicated network topologies might be used as neccessary.
 
