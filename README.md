@@ -49,5 +49,5 @@ Kin Faucet, similar to friendbot, is a web application the funds accounts with K
 
 ## Launch a Network
 
-1. Read the [instalation guide](INSTALL.md).
+1. Read the [installation guide](INSTALL.md).
 1. Go through the [security checklist](SECURITY.md).
