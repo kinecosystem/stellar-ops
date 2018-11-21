@@ -1,11 +1,14 @@
 daemon off;  # run in foreground because docker
 pid /run/nginx.pid;
 worker_processes auto;
+load_module modules/ngx_http_statsd_module.so;
 events {
   worker_connections 50000;
 }
 
 http {
+  statsd_server localhost;
+  statsd_sample_rate ${STATSD_SAMPLE_RATE};
   # https://t37.net/nginx-optimization-understanding-sendfile-tcp_nodelay-and-tcp_nopush.html
   sendfile on;
   tcp_nopush on;
@@ -25,11 +28,13 @@ http {
     proxy_read_timeout ${PROXY_READ_TIMEOUT};
 
     location / {
+      statsd_count "${STATSD_METRIC_PREFIX}.$request_method" 1;
       # http://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive
       proxy_http_version 1.1;
       proxy_set_header Connection "";
       proxy_set_header Host   ${HOST};
       proxy_pass ${PROXY_PASS_URL};
+      statsd_timing "${STATSD_METRIC_PREFIX}.$request_method.index_response_time" "$upstream_response_time";
 
       # if the request is for sse, return 200 instead of 504
       #
