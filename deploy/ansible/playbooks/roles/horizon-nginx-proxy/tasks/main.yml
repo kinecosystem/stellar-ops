@@ -11,7 +11,14 @@
     dest: /opt/horizon-nginx-proxy/docker-compose.yml
     mode: 0400
 
-- name: pull docker image
+- name: pull docker image - this tends to fail so ignore errors
+  docker_service:
+    project_src: /opt/horizon-nginx-proxy
+    stopped: yes
+    pull: yes
+  ignore_errors: yes
+
+- name: pull docker image - again
   docker_service:
     project_src: /opt/horizon-nginx-proxy
     stopped: yes

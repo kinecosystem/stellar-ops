@@ -11,11 +11,18 @@
     dest: /opt/horizon-health-check/docker-compose.yml
     mode: 0400
 
-- name: pull docker image
+- name: pull docker image - this tends to fail so ignore errors
   docker_service:
     project_src: /opt/horizon-health-check
     stopped: yes
     pull: yes
+
+- name: pull docker image - again
+  docker_service:
+    project_src: /opt/horizon-health-check
+    stopped: yes
+    pull: yes
+  ignore_errors: yes
 
 - name: start horizon-health-check
   docker_service:
