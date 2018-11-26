@@ -11,9 +11,9 @@
     dest: /opt/stellar-core/volumes/stellar-core/stellar-core.cfg
     mode: 0400
 
-- name: copy docker-compose.yml
-  copy:
-    src: opt/stellar-core/docker-compose.yml
+- name: template docker-compose.yml
+  template:
+    src: docker-compose.yml.j2
     dest: /opt/stellar-core/docker-compose.yml
     mode: 0644
 

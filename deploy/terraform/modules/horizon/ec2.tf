@@ -84,6 +84,13 @@ module "ec2_security_group" {
       cidr_blocks = "0.0.0.0/0"
     },
     {
+      from_port   = 8125
+      to_port     = 8125
+      protocol    = "tcp"
+      description = "statsd"
+      cidr_blocks = "0.0.0.0/0"
+    },
+    {
       from_port   = 11371
       to_port     = 11371
       protocol    = "tcp"

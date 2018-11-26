@@ -160,6 +160,17 @@ resource "aws_security_group_rule" "egress_datadog" {
   security_group_id = "${aws_security_group.this.id}"
 }
 
+resource "aws_security_group_rule" "egress_telegraf" {
+  type        = "egress"
+  from_port   = 8086
+  to_port     = 8086
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  description = "telegraf"
+
+  security_group_id = "${aws_security_group.this.id}"
+}
+
 resource "aws_security_group_rule" "egress_apt_key_server" {
   type        = "egress"
   from_port   = 11371
