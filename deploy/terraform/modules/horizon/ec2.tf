@@ -84,10 +84,10 @@ module "ec2_security_group" {
       cidr_blocks = "0.0.0.0/0"
     },
     {
-      from_port   = 8125
-      to_port     = 8125
+      from_port   = 8086
+      to_port     = 8086
       protocol    = "tcp"
-      description = "statsd"
+      description = "telegraf"
       cidr_blocks = "0.0.0.0/0"
     },
     {
