@@ -5,7 +5,7 @@ services:
   stellar-core-telegraf-1:
     environment:
      - NODE_NAME="stellar-core-1"
-    image: kinecosystem/stellar-core-telegraf:latest
+    image: kinecosystem/stellar-core-telegraf:v1
     links:
      - "stellar-core:stellar-core"
     restart: on-failure
@@ -42,7 +42,7 @@ services:
   stellar-core-telegraf-2:
     environment:
      - NODE_NAME="stellar-core-2"
-    image: kinecosystem/stellar-core-telegraf:latest
+    image: kinecosystem/stellar-core-telegraf:v1
     links:
      - "stellar-core:stellar-core"
     restart: on-failure
@@ -123,12 +123,14 @@ services:
       POSTGRES_DB: horizon
 
   horizon-nginx-proxy:
-    image: kinecosystem/horizon-nginx-proxy:latest
+    image: kinecosystem/horizon-nginx-statsd:v1
     ports:
       - 8008:80
     links:
       - horizon
     environment:
+      STATSD_SAMPLE_RATE: 100
+      STATSD_METRIC_PREFIX: 'my-horizon'
       PROXY_LISTEN_PORT: 80
       PROXY_READ_TIMEOUT: 10
       PROXY_PASS_URL: http://horizon:8000

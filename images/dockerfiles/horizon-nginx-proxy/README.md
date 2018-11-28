@@ -10,6 +10,13 @@ With this docker image we can proxy requests to Horizon,
 timeout requests on our own instead or letting ELB do it,
 and send 200 instead of 504 for SSE reqests (only requests with the header "text/event-stream" will return as 200 instead of 504)
 
+This nginx image contains a dyanmic module for emitting statsd stats. The stats emitted include the following:
+- number of requests served per method
+- the duration of requests per method
+
+note that you can configure the sample rate as well as the prefix attached
+to the metrices, but the destination is hard-coded to localhost (port 8125), where your statsd/telegraf should reside. This image should be used in conjugation with the horizon-telegraf image, which forwards the statsd stats as influx-db metrics to the metrics intake point.
+
 ## Usage
 
 In docker-compose.yml:
@@ -22,10 +29,12 @@ horizon:
   # ...
 
 horizon-nginx-proxy:
-  image: kinecosystem/horizon-nginx-proxy:latest  # or any other version
+  image: kinecosystem/horizon-nginx-statsd:v1  # or any other version
   ports:
     - 8000:8000
   environment:
+    STATSD_SAMPLE_RATE: 100
+    STATSD_METRIC_PREFIX: 'my-node'
     PROXY_LISTEN_PORT: 8000
     PROXY_READ_TIMEOUT: 10
     PROXY_PASS_URL: http://horizon:8000

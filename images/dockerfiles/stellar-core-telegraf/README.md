@@ -9,7 +9,7 @@ services:
   stellar-core-telegraf:
     environment:
      - NODE_NAME="<insert node name here>"
-    image: kinecosystem/stellar-core-telegraf:latest
+    image: kinecosystem/stellar-core-telegraf:v1
     links:
      - "stellar-core:stellar-core"
     restart: on-failure

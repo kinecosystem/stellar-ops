@@ -2,13 +2,26 @@
 version: "3"
 
 services:
+  horizon-telegraf:
+    image: kinecosystem/horizon-telegraf:v1
+    container_name: horizon-telegraf
+    network_mode: host
+    restart: on-failure
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"
+
   horizon-nginx-proxy:
-    image: kinecosystem/horizon-nginx-proxy:85c6b72
+    image: kinecosystem/horizon-nginx-statsd:v1
     container_name: horizon-nginx-proxy
 
     network_mode: host
 
     environment:
+      STATSD_SAMPLE_RATE: 100
+      STATSD_METRIC_PREFIX: {{horizon.network.name}}
       PROXY_LISTEN_PORT: 80
       PROXY_READ_TIMEOUT: 900
       # horizon listens on port 8000
