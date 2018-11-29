@@ -8,7 +8,7 @@ events {
 
 http {
   statsd_server localhost;
-  statsd_sample_rate ${STATSD_SAMPLE_RATE};
+  statsd_sample_rate ${STATSD_SAMPLE_RATE_PERCENT};
   # https://t37.net/nginx-optimization-understanding-sendfile-tcp_nodelay-and-tcp_nopush.html
   sendfile on;
   tcp_nopush on;

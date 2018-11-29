@@ -166,7 +166,7 @@ resource "aws_security_group_rule" "egress_telegraf" {
   to_port     = 8086
   protocol    = "tcp"
   cidr_blocks = ["0.0.0.0/0"]
-  description = "telegraf"
+  description = "Telegraf metrics"
 
   security_group_id = "${aws_security_group.this.id}"
 }
