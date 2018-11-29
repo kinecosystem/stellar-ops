@@ -137,7 +137,8 @@
     - name: net.ipv4.conf.default.rp_filter
       value: 1
 
-    # this task always fails on the first time. so ignore errors and repeat.
+    # NOTE this task always fails on the first time. so ignore errors and repeat.
+    #
     # Maximum number of sockets in 'TIME_WAIT' state.
     # After reaching this number the system will start destroying the socket that are in this state.
     # Increase this to prevent simple DOS attacks.
