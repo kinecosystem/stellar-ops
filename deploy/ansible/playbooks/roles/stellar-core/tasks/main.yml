@@ -9,7 +9,7 @@
   template:
     src: stellar-core.cfg.j2
     dest: /opt/stellar-core/volumes/stellar-core/stellar-core.cfg
-    mode: 0400
+    mode: 0600
 
 - name: template docker-compose.yml
   template:
@@ -29,6 +29,12 @@
     project_src: /opt/stellar-core
     pull: yes
     stopped: yes
+
+- name: copy init_core script to remote
+  copy:
+    src: "{{ role_path }}/files/opt/stellar-core/init_core.sh"
+    dest: /opt/stellar-core/init_core.sh
+    mode: 0700
 
 - name: initialize database
   command: docker-compose run --rm stellar-core --newdb
