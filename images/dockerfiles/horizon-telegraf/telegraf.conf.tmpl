@@ -3,7 +3,7 @@
 # Global tags can be specified here in key="value" format.
 [tags]
   node_name = "${NODE_NAME}" # take from env
-  network = "${NETWORK_NAME}" # take from env
+  stellar_network = "${NETWORK_NAME}" # take from env
 
 # Configuration for telegraf agent
 [agent]
@@ -60,7 +60,6 @@
   ## Commands array
   commands = [
     "/tmp/check_latency.sh",
-    "/tmp/get_load5.sh",
   ]
 
   name_prefix = "horizon_"
@@ -112,7 +111,7 @@
   delete_timings = true
 
   ## Percentiles to calculate for timing & histogram stats
-  percentiles = [50, 90, 95, 99]
+  percentiles = [50, 70, 90, 95, 99]
 
   ## separator to use between elements of a statsd metric
   metric_separator = "_"
@@ -142,4 +141,15 @@
   # read_buffer_size = 65535
 
 
+[[inputs.cloudwatch]]
+  region = "${REGION_NAME}"
+  period = '1m'
+  delay = '1m'
+  interval = '5m'
+  namespace = 'AWS/RDS'
+  [[inputs.cloudwatch.metrics]]
+    names = ['DatabaseConnections','CPUUtilization','FreeStorageSpace']
+    [[inputs.cloudwatch.metrics.dimensions]]
+      name = 'DBInstanceIdentifier'
+      value = '*'
 # vim: ft=toml

@@ -4,12 +4,13 @@ version: "3"
 
 services:
   horizon-telegraf:
-    image: kinecosystem/horizon-telegraf:v1.0.20
+    image: kinecosystem/horizon-telegraf:v1.0.21
     container_name: horizon-telegraf
     environment:
       NODE_NAME: "{{stellar_core.network.name}}"
       NETWORK_NAME: fed
       TARGET_URL: "{{this_node.stellar_core.url}}/info"
+      REGION_NAME: "{{this_node.aws_region}}"
     network_mode: host
     restart: always
     logging:

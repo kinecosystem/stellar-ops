@@ -5,6 +5,7 @@
 # Global tags can be specified here in key="value" format.
 [tags]
   node_name = "$NODE_NAME" # take from env
+  stellar_network = "$NETWORK_NAME" # take from env
 
 # Configuration for telegraf agent
 [agent]
@@ -82,7 +83,6 @@
   commands = [
     "/tmp/get_core_state.sh",
     "/tmp/get_core_startedOn.sh",
-    "/tmp/get_load5.sh",
   ]
 
   name_prefix = "stellar_core_"
