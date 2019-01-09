@@ -42,15 +42,19 @@
 #                                  OUTPUTS                                    #
 ###############################################################################
 
-[[outputs.graphite]]
-servers = ["metrics.kininfrastructure.com:2003"]
-prefix  = ""
-timeout = 10
+#[[outputs.graphite]]
+#servers = ["metrics.kininfrastructure.com:2003"]
+#prefix  = ""
+#timeout = 10
 
 [[outputs.datadog]]
   # Datadog API key
-  apikey = ${DATADOG_API_KEY}
+  apikey = "${DATADOG_API_KEY}"
 
+#[[outputs.file]]
+#  files = ["/tmp/metrics.out"]
+#  data_format = "json"
+#  json_timestamp_units = "1s"
 
 ###############################################################################
 #                                  INPUTS                                     #
