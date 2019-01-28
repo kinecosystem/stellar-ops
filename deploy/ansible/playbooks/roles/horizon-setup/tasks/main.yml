@@ -24,6 +24,12 @@
     dest: /opt/horizon/scripts/upload_horizon_db.sh
     mode: 0700
 
+- name: template restart_horizon.sh.js script to remote
+  template:
+    src: scripts/restart_horizon.sh.j2
+    dest: /opt/horizon/scripts/restart_horizon.sh
+    mode: 0700
+
 - name: template docker-compose.yml
   template:
     src: docker-compose.yml.j2

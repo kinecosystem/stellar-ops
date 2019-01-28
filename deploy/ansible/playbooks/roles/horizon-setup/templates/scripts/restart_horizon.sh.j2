@@ -1,0 +1,5 @@
+echo 'restarting horizon'
+docker-compose down;docker-compose up -d
+sleep 2
+echo 'current docker images:'
+docker ps
