@@ -56,6 +56,17 @@
 #  data_format = "json"
 #  json_timestamp_units = "1s"
 
+[[outputs.cloudwatch]]
+   ## Amazon REGION
+   region = "us-east-1"
+   access_key = "${AWS_BI_ACCOUNT_ACCESS_KEY}"
+   secret_key = "${AWS_BI_ACCOUNT_SECRET_KEY}"
+   ## Namespace for the CloudWatch MetricDatums
+   namespace = "KinEcosystem/Stats"
+   namepass = ["stellar-core-ledger*"]
+
+
+
 ###############################################################################
 #                                  INPUTS                                     #
 ###############################################################################
@@ -135,6 +146,5 @@
   ## Maximum socket buffer size in bytes, once the buffer fills up, metrics
   ## will start dropping.  Defaults to the OS default.
   # read_buffer_size = 65535
-
 
 # vim: ft=toml
