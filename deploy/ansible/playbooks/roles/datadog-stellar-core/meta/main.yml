@@ -11,7 +11,7 @@ dependencies:
         - stellar-network:{{stellar_core.network.name}}
       collect_ec2_tags: true
       use_dogstatsd: no
-      logs_enabled: true
+      logs_enabled: false
 
     datadog_checks:
 
