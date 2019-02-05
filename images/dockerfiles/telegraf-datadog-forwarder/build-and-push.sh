@@ -1,2 +1,2 @@
-docker build . -t kinecosystem/telegraf-datadog-forwarder:lastest
+docker build . -t kinecosystem/telegraf-datadog-forwarder:latest
 docker push kinecosystem/telegraf-datadog-forwarder:latest

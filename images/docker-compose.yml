@@ -74,6 +74,9 @@ services:
       # versions >= 0.12.2
       FRIENDBOT_URL: http://friendbot:8000
 
+      # cursor name (must be all-caps and unique across all horizon sharing the same core)
+      CURSOR_NAME: "HORIZON" 
+
     restart: on-failure
     logging:
       driver: json-file

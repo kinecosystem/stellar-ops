@@ -20,6 +20,7 @@ services:
       HISTORY_RETENTION_COUNT: "900000"
       NETWORK_PASSPHRASE: "{{horizon.network.passphrase}}"
       FRIENDBOT_URL: '{{horizon.friendbot_url|default("")}}'
+      CURSOR_NAME: "HORIZON" # must be all caps and unique across all horizons sharing the same core
 
     restart: always
     logging:
