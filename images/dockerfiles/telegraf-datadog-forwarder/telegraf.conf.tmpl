@@ -7,7 +7,7 @@
 # Configuration for telegraf agent
 [agent]
   # Default data collection interval for all inputs
-  interval = "10s"
+  interval = "5s"
   # Rounds collection interval to 'interval'
   # ie, if interval="10s" then always collect on :00, :10, :20, etc.
   round_interval = true
@@ -24,7 +24,7 @@
 
   # Default data flushing interval for all outputs. You should not set this below
   # interval. Maximum flush_interval will be flush_interval + flush_jitter
-  flush_interval = "10s"
+  flush_interval = "5s"
   # Jitter the flush interval by a random amount. This is primarily to avoid
   # large write spikes for users running a large number of telegraf instances.
   # ie, a jitter of 5s and interval 10s means flushes will happen every 10-15s
@@ -51,10 +51,19 @@
   # Datadog API key
   apikey = "${DATADOG_API_KEY}"
 
-#[[outputs.file]]
-#  files = ["/tmp/metrics.out"]
-#  data_format = "json"
-#  json_timestamp_units = "1s"
+[[outputs.kinesis]] # sends the fed-network response-time stats to S3
+   region = "us-east-1"
+   streamname = "SLAMetricsStreamResponseTime"
+   data_format = "influx"
+
+   namepass = ["horizon_response_time"]
+   fielddrop = ["stddev", "sum", "lower", "upper"]
+   tagexclude = ["metric_type"]
+   [outputs.kinesis.tagpass]
+    stellar_network = ["fed"] # only collect SLA for fed metrics
+
+   [outputs.kinesis.partition]
+     method = "measurement"
 
 [[outputs.cloudwatch]]
    ## Amazon REGION
@@ -63,9 +72,21 @@
    secret_key = "${AWS_BI_ACCOUNT_SECRET_KEY}"
    ## Namespace for the CloudWatch MetricDatums
    namespace = "KinEcosystem/Stats"
-   namepass = ["stellar-core-ledger*"]
+   namepass = ["stellar-core-ledger*"] # TODO replace this with stellar_core_http
 
+[[outputs.kinesis]] # sends the fed-network ledger stats to S3
+   region = "us-east-1"
+   streamname = "SLAMetricsStreamLedger"
+   data_format = "influx"
 
+   namepass = ["stellar_core_http*"]
+   fielddrop = ["baseReserve", "baseFee", "version"]
+   tagexclude = ["url"]
+   [outputs.kinesis.tagpass]
+    stellar_network = ["fed"] # only collect SLA for fed metrics
+
+  [outputs.kinesis.partition]
+    method = "measurement"
 
 ###############################################################################
 #                                  INPUTS                                     #
@@ -75,9 +96,9 @@
   service_address = ":8086"
 
   ## maximum duration before timing out read of the request
-  read_timeout = "10s"
+  read_timeout = "5s"
   ## maximum duration before timing out write of the response
-  write_timeout = "10s"
+  write_timeout = "5s"
 
   ## Maximum allowed http request body size in bytes.
   ## 0 means to use the default of 536,870,912 bytes (500 mebibytes)
