@@ -65,6 +65,23 @@
    [outputs.kinesis.partition]
      method = "measurement"
 
+#[[outputs.file]]
+  ## Files to write to, "stdout" is a specially handled file.
+  #files = ["/tmp/metrics.out"]
+
+  ## Data format to output.
+  ## Each data format has its own unique set of configuration options, read
+  ## more about them here:
+  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  #data_format = "influx"
+
+  #namepass = ["stellar_core_http*"]
+  #fielddrop = ["version", "baseReserve", "baseFee"]
+  #tagexclude = ["url", "stellar_network", "host"]
+  #[outputs.file.tagpass]
+  # node_name = ["kin-fed"] # only collect SLA for kin-fed node metrics
+
+
 [[outputs.cloudwatch]]
    ## Amazon REGION
    region = "us-east-1"
@@ -72,7 +89,11 @@
    secret_key = "${AWS_BI_ACCOUNT_SECRET_KEY}"
    ## Namespace for the CloudWatch MetricDatums
    namespace = "KinEcosystem/Stats"
-   namepass = ["stellar-core-ledger*"] # TODO replace this with stellar_core_http
+   namepass = ["stellar_core_http*"]
+   fielddrop = ["version", "baseReserve", "baseFee"]
+   tagexclude = ["url", "stellar_network", "host"]
+   [outputs.cloudwatch.tagpass]
+    node_name = ["kin-fed"] # only collect SLA for kin-fed node metrics
 
 [[outputs.kinesis]] # sends the fed-network ledger stats to S3
    region = "us-east-1"
