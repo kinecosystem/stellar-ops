@@ -65,7 +65,7 @@
    [outputs.kinesis.partition]
      method = "measurement"
 
-#[[outputs.file]]
+ #[[outputs.file]]
   ## Files to write to, "stdout" is a specially handled file.
   #files = ["/tmp/metrics.out"]
 
@@ -79,7 +79,7 @@
   #fielddrop = ["version", "baseReserve", "baseFee"]
   #tagexclude = ["url", "stellar_network", "host"]
   #[outputs.file.tagpass]
-  # node_name = ["kin-fed"] # only collect SLA for kin-fed node metrics
+  # node_name = ["d491"]
 
 
 [[outputs.cloudwatch]]
@@ -93,7 +93,7 @@
    fielddrop = ["version", "baseReserve", "baseFee"]
    tagexclude = ["url", "stellar_network", "host"]
    [outputs.cloudwatch.tagpass]
-    node_name = ["kin-fed"] # only collect SLA for kin-fed node metrics
+    node_name = ["d491"] # only ship metrics for d491 node. later replace with kin-fed
 
 [[outputs.kinesis]] # sends the fed-network ledger stats to S3
    region = "us-east-1"
