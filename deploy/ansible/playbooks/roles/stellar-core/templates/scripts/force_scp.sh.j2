@@ -1,0 +1,6 @@
+# this script sets the forces-SCP flag on the local core
+#!/usr/bin/env bash
+cd /opt/stellar-core
+docker-compose down
+docker-compose run --rm stellar-core --forcescp
+docker-compose up -d

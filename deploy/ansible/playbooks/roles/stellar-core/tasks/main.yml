@@ -44,6 +44,12 @@
     dest: /opt/stellar-core/scripts/init_core.sh
     mode: 0700
 
+- name: template force_scp script to remote
+  template:
+    src: scripts/force_scp.sh.j2
+    dest: /opt/stellar-core/scripts/force_scp.sh
+    mode: 0700
+
 - name: template upload_core_logs script to remote
   template:
     src: scripts/upload_core_logs.sh.j2
