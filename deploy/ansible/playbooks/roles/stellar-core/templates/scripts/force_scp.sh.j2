@@ -1,6 +1,15 @@
-# this script sets the forces-SCP flag on the local core
+{% set this_node = stellar_core.nodes|selectattr("name", "equalto", inventory_hostname)|first %}
+
+# this script zips the core logs and then sets the force-SCP flag on the local core
 #!/usr/bin/env bash
 cd /opt/stellar-core
+echo 'zipping core logs prior to restart'
+core_image_prefix=`docker ps|grep 'kinecosystem/stellar-core:'|awk '{print $1}'`
+zipped_filename=/opt/stellar-core/core_logs_$core_image_prefix.tar
+tar cvfz $zipped_filename /var/lib/docker/containers/$core_image_prefix*
+echo 'shutting down node, setting force-scp flag, restarting node'
 docker-compose down
 docker-compose run --rm stellar-core --forcescp
 docker-compose up -d
+echo 'uploading the logs to aws'
+aws s3 cp $zipped_filename {{this_node.archive.put_address}}temp/
