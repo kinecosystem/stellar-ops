@@ -93,13 +93,22 @@
   ## Timeout for each command to complete.
   timeout = "5s"
 
-  ## measurement name suffix (for separating different commands)
-  #name_suffix = "_mycollector"
+  data_format = "influx"
 
-  ## Data format to consume.
-  ## Each data format has its own unique set of configuration options, read
-  ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+
+[[inputs.exec]]
+  interval = "10m"
+
+  ## Commands array
+  commands = [
+    "/tmp/core_connectivity_check.sh /tmp/core_connectivity_targets.txt",
+  ]
+
+  name_prefix = "stellar_core_"
+
+  ## Timeout for each command to complete.
+  timeout = "5s"
+
   data_format = "influx"
 
 
