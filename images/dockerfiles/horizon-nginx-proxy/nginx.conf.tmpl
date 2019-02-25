@@ -48,6 +48,10 @@ http {
       return 200;
     }
 
+    location /status {
+      proxy_pass http://localhost:8001/status;
+    }
+
     # metrics
     location /nginx_status {
       allow 127.0.0.1;
