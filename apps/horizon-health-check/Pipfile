@@ -15,4 +15,4 @@ flask-cors = "*"
 gunicorn = "*"
 
 [requires]
-python_version = "3.7.1"
+python_version = "3.7.2"

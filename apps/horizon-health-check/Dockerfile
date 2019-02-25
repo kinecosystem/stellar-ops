@@ -1,4 +1,4 @@
-FROM python:3.6.8-alpine3.9
+FROM python:3.7.2-alpine3.9
 
 COPY main.py Pipfile Pipfile.lock /opt/horizon-health-check/
 WORKDIR /opt/horizon-health-check

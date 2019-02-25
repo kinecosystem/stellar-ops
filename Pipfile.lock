@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e369d746970e89afbacdc6888b8a97b37819b8e92929a1ea4fd070df58670b56"
+            "sha256": "9571b9c62c7c100b60c8d0070fa8442904c94adcbf0a07262c4c4cf6d2cce2df"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.7"
+            "python_version": "3.7.2"
         },
         "sources": [
             {
@@ -180,11 +180,10 @@
         },
         "isort": {
             "hashes": [
-                "sha256:1153601da39a25b14ddc54955dbbacbb6b2d19135386699e2ad58517953b34af",
-                "sha256:b9c40e9750f3d77e6e4d441d8b0266cf555e7cdabdcff33c4fd06366ca761ef8",
-                "sha256:ec9ef8f4a9bc6f71eec99e1806bfa2de401650d996c59330782b89a5555c1497"
+                "sha256:8d9da6c6de0a32004d5eb841c4357f00b29db9247b9875fef4e04b4c78e3f353",
+                "sha256:a25c2d677b85e309598faf8a0c8ffac5f247a15563a98dac8009ef460d17bdeb"
             ],
-            "version": "==4.3.4"
+            "version": "==4.3.6"
         },
         "lazy-object-proxy": {
             "hashes": [
@@ -229,11 +228,11 @@
         },
         "pycodestyle": {
             "hashes": [
-                "sha256:cbc619d09254895b0d12c2c691e237b2e91e9b2ecf5e84c26b35400f93dcfb83",
-                "sha256:cbfca99bd594a10f674d0cd97a3d802a1fdef635d4361e1a2658de47ed261e3a"
+                "sha256:95a2219d12372f05704562a14ec30bc76b05a5b297b21a5dfe3f6fac3491ae56",
+                "sha256:e40a936c9a450ad81df37f549d676d127b1b66000a6c500caa2b085bc0ca976c"
             ],
             "index": "pypi",
-            "version": "==2.4.0"
+            "version": "==2.5.0"
         },
         "pydocstyle": {
             "hashes": [
@@ -268,9 +267,9 @@
         },
         "wrapt": {
             "hashes": [
-                "sha256:d4d560d479f2c21e1b5443bbd15fe7ec4b37fe7e53d335d3b9b0a7b1226fe3c6"
+                "sha256:4aea003270831cceb8a90ff27c4031da6ead7ec1886023b80ce0dfe0adf61533"
             ],
-            "version": "==1.10.11"
+            "version": "==1.11.1"
         }
     }
 }
