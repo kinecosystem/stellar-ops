@@ -1,8 +1,2 @@
 stellar-core-kikkinfed-ee65.kik-kin-federation.com
 stellar-core-kin-fed-e50b.kinfederation.com
-stellar-core-tapnodes-d00c.tapnodes.com
-stellar-core-swellykin-0e26.dvelinc.com
-stellar-core-socialfoundrykin-774f.socialfoundrykin.com
-stellar-core-ventkin-ebc9.ventkin.com
-stellar-core-p365kinfed-ca5e.p365federation.com
-stellar-core-madlipz-feder-f0de.madlipzfederation.com
