@@ -152,9 +152,6 @@ def build_go(c, version, branch='kinecosystem/master', app='horizon', production
 
         init_git_repo(c, 'https://github.com/kinecosystem/go.git', 'go-git', branch)
 
-        with c.cd('volumes/go-git'):
-            vendor(c, production)
-
         cmd = ' '.join([
             'bash', '-c',
             ('"go build -ldflags=\''
@@ -168,22 +165,31 @@ def build_go(c, version, branch='kinecosystem/master', app='horizon', production
 
         print('Building {}'.format(app.capitalize()))
 
+        # build go app compile environment
+        #
+        # NOTE horizon-build docker image is used to build any Golang app
+        # since they share the same dependencies
         if production:
-            # build
-            #
-            # NOTE horizon-build docker image is used to build any Golang app
-            # since they share the same dependencies
             c.run('sudo docker build '
                   '-f dockerfiles/Dockerfile.horizon-build '
                   '-t kinecosystem/horizon-build '
                   '.')
+        else:
+            # build using docker compose for local test network
+            c.run('sudo docker-compose build horizon-build')
 
+        with c.cd('volumes/go-git'):
+            vendor(c, production)
+
+        if production:
+            # compile go app
             c.run('sudo docker run '
                   '--rm '
                   '-v {}/{}/volumes/go-git:/go/src/github.com/kinecosystem/go '
                   'kinecosystem/horizon-build '
                   '{}'.format(os.getcwd(), c.cwd, cmd))
 
+            # build runtime image (copy binary into image)
             c.run('sudo docker build '
                   '-f dockerfiles/Dockerfile.{app} '
                   '-t kinecosystem/{app}:latest '
@@ -191,7 +197,11 @@ def build_go(c, version, branch='kinecosystem/master', app='horizon', production
                   '.'.format(app=app, version=version))
         else:
             # build using docker compose for local test network
+
+            # compile go app
             c.run('sudo docker-compose run horizon-build {cmd}'.format(cmd=cmd))
+
+            # build runtime image (copy binary into image)
             c.run('sudo docker-compose build {}'.format(app))
 
 
