@@ -11,8 +11,7 @@ cd /stellar-core
 # make format
 
 # build
-make -j $(nproc)
-
+make -j $(nproc) check && make -j $(nproc)
 # test
 # export ALL_VERSIONS=1
 # make check
