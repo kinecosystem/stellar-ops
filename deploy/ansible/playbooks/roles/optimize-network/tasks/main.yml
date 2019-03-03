@@ -147,7 +147,7 @@
     # sysctl net.netfilter.nf_conntrack_count
     # hashsize = nf_conntrack_max / 8
     # echo 16384 > /sys/module/nf_conntrack/parameters/hashsize
-    - name: net.netfilter.nf_conntrack_max - this always fails on the first time, so run twice
+    - name: net.netfilter.nf_conntrack_max # this always fails on the first time, so run twice
       value: 131072
       ignore_errors: yes
 
