@@ -1,6 +1,19 @@
 version: "3"
 
 services:
+  stellar-core-metrics-exporter:
+    image: kinecosystem/stellar-core-metrics-exporter:v1.0.0
+    container_name: stellar_core_metrics_exporter
+    links:
+     - "stellar-core:stellar-core"
+    restart: always
+    ports:
+      - 9473:9473
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"
 
   stellar-core-telegraf:
     image: kinecosystem/stellar-core-telegraf:v1.0.29
@@ -10,6 +23,7 @@ services:
     container_name: stellar_core_telegraf
     links:
      - "stellar-core:stellar-core"
+     - "stellar-core-metrics-exporter:stellar-core-metrics-exporter"
     restart: always
     logging:
       driver: json-file
