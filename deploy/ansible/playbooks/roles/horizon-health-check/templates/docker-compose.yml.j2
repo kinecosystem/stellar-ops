@@ -7,7 +7,7 @@ services:
   horizon-health-check:
     command: pipenv run gunicorn -b 0.0.0.0:8001 main:APP
 
-    image: kinecosystem/horizon-health-check:a25eb1c
+    image: kinecosystem/horizon-health-check:v1.0.1
     container_name: horizon-health-check
 
     network_mode: host

@@ -130,8 +130,8 @@
   max_line_size = 0
 
   # filter out core_metrics_* becuase there's just so many of them
-  namepass = ["core_metrics_stellar_database_operations*"]
-  #namedrop = ["core_metrics_*"] # will drop all metrics from the core
+  #namepass = ["core_metrics_stellar_database_operations*"]
+  namedrop = ["core_metrics_*"] # will drop all metrics from the core's /metrics endpoint
 
 
 # Statsd Server
