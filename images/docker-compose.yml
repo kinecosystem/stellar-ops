@@ -155,9 +155,3 @@ services:
       HORIZON_ENDPOINT_TESTNET: http://localhost:8000
       NETWORK_PASSPHRASE_TESTNET: private testnet
       FRIENDBOT_ENDPOINT: http://localhost:8001
-
-  stellar-archivist:
-    image: kinecosystem/stellar-archivist
-    volumes:
-      - ./volumes/stellar-archivist/opt/stellar-archivist:/opt/stellar-archivist
-
