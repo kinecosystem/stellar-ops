@@ -47,10 +47,37 @@
 #prefix  = ""
 #timeout = 10
 
+# an putput for getting specific op-counts from one node's core (I chose kik)
+[[outputs.datadog]]
+  apikey = "${DATADOG_API_KEY}"
+  namepass = ["core_metrics_stellar_operations_total"]
+  [outputs.datadog.tagpass]
+  node_name = ["kikkinfed"]
+  [outputs.datadog.fieldpass]
+  operation = ["payment","create-account"]
+
+[[outputs.datadog]]
+  # output the db metrics for the txhistory table from the cores. this inclues
+  # operations like insert, delete and update (we only care for inserts, really).
+  # with this configuration, all cores will report their local rate, which would allow us to
+  # compare their performance.
+
+  apikey = "${DATADOG_API_KEY}"
+  fieldpass = ["0.95","0.75"]
+  tagexclude = ["url","host"]
+  namepass = ["core_metrics_stellar_database_operations_ms"]
+  [outputs.datadog.tagpass]
+    table = ["txhistory"]
+
 [[outputs.datadog]]
   # Datadog API key
   apikey = "${DATADOG_API_KEY}"
 
+  # drop a whole bunch of tags from various measurements (mem, netstat, disk, net) to save monies
+  fielddrop = ["tcp_established", "tcp_syn_recv", "tcp_none", "udp_socket", "tcp_closing", "tcp_syn_sent", "tcp_fin_wait1", "tcp_close", "tcp_fin_wait2", "tcp_close_wait", "tcp_last_ack", "tcp_time_wait", "inodes_*", "mode", "icmp*", "udplite*", "ip_*", "udp_*", "swap_*","vmalloc_*","huge_page*","page_tables", "write_back*", "committed_as", "slab", "wired", "baseFee", "baseReserve"]
+
+  namedrop = ["core_metrics*"] # dont send to dd, as there's so many of these. there are dedicaed outputs for these metrics
+ 
 [[outputs.kinesis]] # sends the fed-network response-time stats to S3
    region = "us-east-1"
    streamname = "SLAMetricsStreamResponseTime"
@@ -67,20 +94,25 @@
 
  #[[outputs.file]]
   ## Files to write to, "stdout" is a specially handled file.
-  #files = ["/tmp/metrics.out"]
-
-  ## Data format to output.
-  ## Each data format has its own unique set of configuration options, read
-  ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  #files = ["/tmp/metrics.out", "stdout"]
   #data_format = "influx"
 
+  #namepass = ["*"]
   #namepass = ["stellar_core_http*"]
-  #fielddrop = ["version", "baseReserve", "baseFee"]
+  #fielddrop = ["tcp_established", "tcp_syn_recv"]
+
   #tagexclude = ["url", "stellar_network", "host"]
   #[outputs.file.tagpass]
   # node_name = ["d491"]
 
+  #fieldpass = ["0.95","0.75"]
+  #tagexclude = ["url","host"]
+  #namepass = ["core_metrics_stellar_database_operations_ms"]
+  #[outputs.file.tagpass]
+    #table = ["txhistory"]
+    #operation = ["insert"]
+
+  #namedrop = ["core_metrics*"] # will drop all metrics from the core's /metrics endpoint
 
 [[outputs.cloudwatch]]
    ## Amazon REGION
@@ -93,7 +125,7 @@
    fielddrop = ["version", "baseReserve", "baseFee"]
    tagexclude = ["url", "stellar_network", "host"]
    [outputs.cloudwatch.tagpass]
-    node_name = ["d491"] # only ship metrics for d491 node. later replace with kin-fed
+    node_name = ["kin-fed"] # only ship metrics for kin-fed node
 
 [[outputs.kinesis]] # sends the fed-network ledger stats to S3
    region = "us-east-1"
@@ -128,11 +160,6 @@
   ## Maximum line size allowed to be sent in bytes.
   ## 0 means to use the default of 65536 bytes (64 kibibytes)
   max_line_size = 0
-
-  # filter out core_metrics_* becuase there's just so many of them
-  #namepass = ["core_metrics_stellar_database_operations*"]
-  namedrop = ["core_metrics_*"] # will drop all metrics from the core's /metrics endpoint
-
 
 # Statsd Server
 [[inputs.statsd]]

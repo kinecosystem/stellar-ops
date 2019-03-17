@@ -44,6 +44,10 @@
 ###############################################################################
 #                                  OUTPUTS                                    #
 ###############################################################################
+# enable to debug
+#[[outputs.file]]
+#  files = ["/tmp/metrics.out", "stdout"]
+#  data_format = "influx"
 
 [[outputs.influxdb]]
   urls = ["http://metrics.kininfrastructure.com:8086"]

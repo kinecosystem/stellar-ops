@@ -59,7 +59,7 @@
 [[inputs.exec]]
   ## Commands array
   commands = [
-    "/tmp/check_latency.sh",
+    "/opt/telegraf/scripts/check_latency.sh",
   ]
 
   name_prefix = "horizon_"
@@ -74,6 +74,21 @@
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
   ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  data_format = "influx"
+
+[[inputs.exec]]
+  # every second, sample the ingestion distance at horizon
+  # ingestion distance is the difference between latest ledger in core and horizon
+  commands = [
+    "/opt/telegraf/scripts/get_ingestion_distance.sh",
+  ]
+
+  interval = "1s"
+  name_prefix = "horizon_"
+
+  ## Timeout for each command to complete.
+  timeout = "1s"
+
   data_format = "influx"
 
 
