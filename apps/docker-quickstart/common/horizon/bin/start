@@ -20,4 +20,4 @@ done
 
 echo "starting horizon..."
 set -e
-exec $DIR/horizon
+exec $DIR/horizon serve
