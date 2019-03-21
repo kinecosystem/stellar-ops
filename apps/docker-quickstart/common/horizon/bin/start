@@ -1,0 +1,23 @@
+#! /bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+while ! psql -U stellar -c 'select 1' horizon &> /dev/null ; do
+  echo "Waiting for postgres to be available..."
+  sleep 1
+done
+
+while ! stellar-core --conf /opt/stellar/core/etc/stellar-core.cfg -c info &> /dev/null ; do
+  echo "Waiting for stellar-core to be available..."
+  sleep 1
+done
+
+# add an artifical sleep here: give the core some time to sync
+while ! curl localhost:11626/info|grep 'Synced'; do
+	echo "waiting for core to be synced"
+	sleep 1
+done
+
+echo "starting horizon..."
+set -e
+exec $DIR/horizon
