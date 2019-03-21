@@ -1,34 +1,27 @@
-# Stellar Quickstart Docker Image
+# Blockchain Quickstart Docker Image
 
-TL;DR: 
-run an ephemeral horizon + core node on testnet with the following docker command:
+## TL;DR
 
-    docker run -d -p 8000:8000  -e CATCHUP_RECENT_NUM=100000 -e HISTORY_RETENTION_COUNT=90000 kinecosystem/kin-quickstart:v2.0.3_catchup_wl --testnet
+Run an ephemeral horizon + core node on testnet with the following docker command:
 
-### Overview
-This is fork of the original repo. The differences between the original repo and this one are:
-- the configurion of testnet, pubnet
-- some changes to how this image can be built.
+```bash
+docker run \
+    -d \
+    -p 8000:8000 \
+    -e CATCHUP_RECENT_NUM=1 \
+    -e HISTORY_RETENTION_COUNT=90000 \
+    kinecosystem/blockchain-quickstart:latest --testnet
+```
 
-Building: 
-to build this docker image you'll need to get your hands on the binaries (horizon, core). those get copied from the local directory into the docker image. The original repo wget those binaries, but we dont.
-
-Tip: to extract the apps from an already-built docker image, run them locally and use 'docker cp <containerId>:/usr/local/bin/<stellar-core|horizon> ./' to copy them to the localhost.
-  
-a note regarding security upgrade:
-the images generated here is based on the Stellar/Base image which in turn is based on Debian's Stretch.
-  
-# Original repo readme starts here:
-
-This project provides a simple way to incorporate stellar-core and horizon into your private infrastructure, provided that you use docker.
+This project provides a simple way to incorporate Core and Horizon into your private infrastructure, provided that you use Docker.
 
 This image provide a default, non-validating, ephemeral configuration that should work for most developers.  By configuring a container using this image with a host-based volume (described below in the "Usage" section) an operator gains access to full configuration customization and persistence of data.
 
 The image uses the following software:
 
-- Postgresql 9.6 is used for storing both stellar-core and horizon data
-- [stellar-core](https://github.com/stellar/stellar-core)
-- [horizon](https://github.com/stellar/horizon)
+- Postgresql 9.6 is used for storing both Core and Horizon data.
+- [Core](https://github.com/kinecosystem/core)
+- [Horizon](https://github.com/kinecosystem/horizon)
 - Supervisord is used from managing the processes of the services above.
 
 ## Usage
@@ -54,11 +47,10 @@ Ephermeral mode is provided to support development and testing environments.  Ev
 Starting an ephemeral node is simple, just craft a `docker run` command to launch the appropriate image but *do not mount a volume*.  To craft your docker command, you need the network name you intend to run against and the flags to expose the ports your want available (See the section named "Ports" below to learn about exposing ports).  Thus, launching a testnet node while exposing horizon would be:
 
 ```shell
-$ docker run --rm -it -p "8000:8000" --name stellar stellar/quickstart --testnet
+$ docker run --rm -it -p "8000:8000" --name kin kinecosystem/blockchain-quickstart --testnet
 ```  
 
 As part of launching, an ephemeral mode container will generate a random password for securing the postgresql service and will output it to standard out.  You may use this password (provided you have exposed the postgresql port) to access the running postgresql database (See the section "Accessing Databases" below).
-
 
 ### Persistent mode
 
@@ -67,7 +59,7 @@ In comparison to ephemeral mode, persistent mode is more complicated to operate,
 Starting a persistent mode container is the same as the ephemeral mode with one exception:
 
 ```shell
-docker run --rm -it -p "8000:8000" -v "/home/scott/stellar:/opt/stellar" --name stellar stellar/quickstart --testnet
+docker run --rm -it -p "8000:8000" -v "/home/scott/stellar:/opt/stellar" --name kin kinecosystem/blockchain-quickstart --testnet
 ```
 
 The `-v` option in the example above tells docker to mount the host directory `/home/scott/stellar` into the container at the `/opt/stellar` path.  You may customize the host directory to any location you like, simply make sure to use the same value every time you launch the container.  Also note: an absolute directory path is required.  The second portion of the volume mount (`/opt/stellar`) should never be changed.  This special directory is checked by the container to see if it is mounted from the host system which is used to see if we should launch in ephemeral or persistent mode.
@@ -77,7 +69,6 @@ Upon launching a persistent mode container for the first time, the launch script
 1.  Run an interactive session of the container at first, ensuring that all services start and run correctly.
 2.  Shut down the interactive container (using Ctrl-C).
 3.  Start a new container using the same host directory in the background.
-
 
 ### Customizing configurations
 
@@ -110,6 +101,7 @@ It is recommended that you stop the container before editing any of these files,
 
 Managing UIDs between a docker container and a host volume can be complicated.  At present, this image simply tries to create a UID that does not conflict with the host system by using a preset UID:  10011001.  Currently there is no way to customize this value.  All data produced in the host volume be owned by 10011001.  If this UID value is inappropriate for your infrastructure we recommend you fork this project and do a find/replace operation to change UIDs.  We may improve this story in the future if enough users request it.
 
+
 ## Ports
 
 | Port  | Service      | Description          |
@@ -129,6 +121,7 @@ It is safe to open the horizon http port.  Horizon is designed to listen on an i
 The HTTP port for stellar-core should only be exposed to a trusted network, as it provides no security itself.  An attacker that can make requests to the port will be able to perform administrative commands such as forcing a catchup or changing the logging level and more, many of which could be used to disrupt operations or deny service.
 
 The peer port for stellar-core however can be exposed, and ideally would be routable from the internet.  This would allow external peers to initiate connections to your node, improving connectivity of the overlay network.  However, this is not required as your container will also establish outgoing connections to peers.
+
 
 ## Accessing and debugging a running container
 
@@ -181,7 +174,7 @@ Below is a list of various ways you might want to launch the quickstart containe
 
 *Launch an ephemeral pubnet node in the background:*
 ```
-$ docker run -d -p "8000:8000" --name stellar stellar/quickstart --pubnet
+$ docker run -d -p "8000:8000" --name kin kinecosystem/blockchain-quickstart --pubnet
 ```
 
 *Launch an ephemeral testnet node in the foreground, exposing all ports:*
@@ -191,7 +184,7 @@ $ docker run --rm -it \
     -p "11626:11626" \
     -p "11625:11625" \
     --name stellar \
-    stellar/quickstart --testnet
+    kinecosystem/blockchain-quickstart --testnet
 ```
 
 *Setup a new persistent node using the host directory `/str`:*
@@ -199,7 +192,7 @@ $ docker run --rm -it \
 $ docker run -it --rm \
     -v "/str:/opt/stellar" \
     --name stellar \
-    stellar/quickstart --pubnet
+    kineosystem/blockchain-quickstart --pubnet
 ```
 
 *Start a background persistent container for an already initialized host directory:*
@@ -208,9 +201,5 @@ $ docker run -d \
     -v "/str:/opt/stellar" \
     -p "8000:8000" \
     --name stellar \
-    stellar/quickstart --pubnet
+    kineosystem/blockchain-quickstart --pubnet
 ```
-
-## Troubleshooting
-
-Let us know what you're having trouble with!  Open an issue or join us on our public slack channel.
