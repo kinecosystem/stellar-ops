@@ -84,7 +84,7 @@
    data_format = "influx"
 
    namepass = ["horizon_response_time"]
-   fielddrop = ["stddev", "sum", "lower", "upper"]
+   fielddrop = ["stddev", "sum", "lower"] # we really just care for upper, mean
    tagexclude = ["metric_type"]
    [outputs.kinesis.tagpass]
     stellar_network = ["fed"] # only collect SLA for fed metrics
