@@ -82,6 +82,7 @@
 [[inputs.exec]]
   # This input runs the scripts below which generate various metrics every 5 secs
   commands = [
+    "/tmp/get-core-synced-status.sh",
     "/tmp/get_core_state.sh",
     "/tmp/get_core_startedOn.sh",
     "/tmp/get_ledger_stats.sh"
