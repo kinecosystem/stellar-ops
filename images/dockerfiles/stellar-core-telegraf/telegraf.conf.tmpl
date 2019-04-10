@@ -1,6 +1,4 @@
-# Telegraf configuration for stellar core:
-# this configuration does one thing: it reports the /info metrics from the core
-# to the Kin Ecosystem metric collection endpoint, every 10 seconds
+# Telegraf configuration for stellar core
 
 # Global tags can be specified here in key="value" format.
 [tags]
@@ -40,14 +38,9 @@
   # Override default hostname, if empty use os.Hostname()
   hostname = ""
 
-
 ###############################################################################
-#                                  OUTPUTS                                    #
+#        OUTPUTS: SEND EVERYTHING TO THE METRICS-FORWARDERS                   #
 ###############################################################################
-# enable to debug
-#[[outputs.file]]
-#  files = ["/tmp/metrics.out", "stdout"]
-#  data_format = "influx"
 
 [[outputs.influxdb]]
   urls = ["http://metrics.kininfrastructure.com:8086"]
@@ -61,8 +54,9 @@
 #                                  INPUTS                                     #
 ###############################################################################
 
-# parse json from http
+
 [[inputs.http]]
+  # this input parses json from http. specifically, it gets the 'info.ledger' field
   
   interval = "4s" # send these metrics every 4 seconds to get all ledgers
 
@@ -86,7 +80,7 @@
   json_query = "info.ledger"
 
 [[inputs.exec]]
-  ## Commands array
+  # This input runs the scripts below which generate various metrics every 5 secs
   commands = [
     "/tmp/get_core_state.sh",
     "/tmp/get_core_startedOn.sh",
@@ -102,6 +96,7 @@
 
 
 [[inputs.exec]]
+  # This input runs the scripts below which generates connectivity info every 10 minutes
   interval = "10m"
 
   ## Commands array
@@ -117,8 +112,16 @@
   data_format = "influx"
 
 [[inputs.prometheus]]
-  ## An array of urls to scrape metrics from.
+  # Scrapes ALL the metrics from the metrics exporter docker container.
   urls = ["http://stellar-core-metrics-exporter:9473/metrics"]
   name_prefix = "core_metrics_"
+
+###############################################################################
+#                             DEBUG OUTPUTS                                   #
+###############################################################################
+# enable to debug
+#[[outputs.file]]
+#  files = ["/tmp/metrics.out", "stdout"]
+#  data_format = "influx"
 
 # vim: ft=toml

@@ -40,7 +40,7 @@
 
 
 ###############################################################################
-#                                  OUTPUTS                                    #
+#            OUTPUT: SEND EVERYTHING TO THE METRICS-FORWARDERS                #
 ###############################################################################
 
 [[outputs.influxdb]]
@@ -57,23 +57,12 @@
 
 
 [[inputs.exec]]
-  ## Commands array
+  ## runs a script to measture the latency between the horizon and the core's info endpoint
   commands = [
     "/opt/telegraf/scripts/check_latency.sh",
   ]
-
   name_prefix = "horizon_"
-
-  ## Timeout for each command to complete.
   timeout = "5s"
-
-  ## measurement name suffix (for separating different commands)
-  #name_suffix = "_mycollector"
-
-  ## Data format to consume.
-  ## Each data format has its own unique set of configuration options, read
-  ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 
 [[inputs.exec]]
@@ -85,15 +74,12 @@
 
   interval = "1s"
   name_prefix = "horizon_"
-
   ## Timeout for each command to complete.
   timeout = "1s"
-
   data_format = "influx"
 
-
-# Statsd Server
 [[inputs.statsd]]
+  # Statsd Server: receives metrics from the statsd plugin on the NGNIX
   ## Protocol, must be "tcp", "udp4", "udp6" or "udp" (default=udp)
   protocol = "udp"
   
@@ -157,6 +143,9 @@
 
 
 [[inputs.cloudwatch]]
+  # grab RDS metrics for BOTH horizon and core DBs
+  # TODO: split this into two inputs: one here and another on the core's telegraf
+  # s.t each collects their respective DB metrics in RDS.
   region = "${REGION_NAME}"
   period = '1m'
   delay = '5m'
