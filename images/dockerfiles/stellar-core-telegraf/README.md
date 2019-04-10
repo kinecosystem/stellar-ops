@@ -10,8 +10,8 @@ In docker-compose, add the following service next to the stellar-core one.
 services:
   stellar-core-telegraf:
     environment:
-      - NODE_NAME="<insert node name here>"
-      - NETWORK_NAME="<insert stellar-network name here>"
+      NODE_NAME: "<insert node name here>"
+      NETWORK_NAME: "<insert stellar-network name here>"
     image: kinecosystem/stellar-core-telegraf:latest
     links:
       - "stellar-core:stellar-core"
