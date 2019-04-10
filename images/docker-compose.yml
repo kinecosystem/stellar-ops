@@ -4,11 +4,34 @@ version: "3"
 services:
 
   stellar-core-telegraf:
+    build:
+      dockerfile: Dockerfile
+      context: ./dockerfiles/stellar-core-telegraf
     environment:
-      - NODE_NAME="stellar-core"
-    image: kinecosystem/stellar-core-telegraf:latest
+      NODE_NAME: "stellar-core"
+      NETWORK_NAME: "local"
     links:
       - stellar-core
+      - telegraf-forwarder
+    volumes:
+      - ./volumes/stellar-core-telegraf/tmp:/tmp
+    restart: on-failure
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"
+
+  telegraf-forwarder:
+    build:
+      dockerfile: Dockerfile
+      context: ./dockerfiles/telegraf-datadog-forwarder
+    environment:
+      DATADOG_API_KEY: ''
+      AWS_BI_ACCOUNT_ACCESS_KEY: ''
+      AWS_BI_ACCOUNT_SECRET_KEY: ''
+    volumes:
+      - ./volumes/telegraf-datadog-forwarder/tmp:/tmp
     restart: on-failure
     logging:
       driver: json-file
