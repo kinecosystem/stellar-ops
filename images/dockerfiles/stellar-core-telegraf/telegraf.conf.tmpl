@@ -82,10 +82,10 @@
 [[inputs.exec]]
   # This input runs the scripts below which generate various metrics every 5 secs
   commands = [
-    "/tmp/get-core-synced-status.sh",
-    "/tmp/get-app-state-current.sh",
-    "/tmp/get_core_startedOn.sh",
-    "/tmp/get_ledger_stats.sh"
+    "/usr/bin/get-core-synced-status.sh -a stellar-core:11626",
+    "/usr/bin/get-app-state-current.sh -a stellar-core:11626",
+    "/usr/bin/get-core-startedOn.sh -a stellar-core:11626",
+    "/usr/bin/get-ledger-stats.sh -a stellar-core:11626"
   ]
 
   name_prefix = "stellar_core_"
