@@ -1,5 +1,4 @@
-# Telegraf configuration metric forwarding
-# This configuration forwards metrics incoming on port 8086 to a graphite format on port 2003
+# Telegraf configuration for the metric forwarder machines.
 
 # Global tags can be specified here in key="value" format.
 [tags]
@@ -39,16 +38,12 @@
 
 
 ###############################################################################
-#                                  OUTPUTS                                    #
+#                     OUTPUTS THAT FORWARD METRICS TO DD                      #
 ###############################################################################
 
-#[[outputs.graphite]]
-#servers = ["metrics.kininfrastructure.com:2003"]
-#prefix  = ""
-#timeout = 10
-
-# an putput for getting specific op-counts from one node's core (I chose kik)
 [[outputs.datadog]]
+  # an output used exclusively for forwarding specific op-counts (like number of payment ops) 
+  # from one node's core (I chose the kik node)
   apikey = "${DATADOG_API_KEY}"
   namepass = ["core_metrics_stellar_operations_total"]
   [outputs.datadog.tagpass]
@@ -57,19 +52,21 @@
   operation = ["payment","create-account"]
 
 [[outputs.datadog]]
-  # output the db metrics for the txhistory table from the cores. this inclues
-  # operations like insert, delete and update (we only care for inserts, really).
+  # an output used exclusively for forwarding db metrics of the txhistory table from the cores. 
+  # this includes operations like insert, delete and update (we only care for inserts, really).
   # with this configuration, all cores will report their local rate, which would allow us to
   # compare their performance.
 
   apikey = "${DATADOG_API_KEY}"
+  namepass = ["core_metrics_stellar_database_operations_ms"]
   fieldpass = ["0.95","0.75"]
   tagexclude = ["url","host"]
-  namepass = ["core_metrics_stellar_database_operations_ms"]
   [outputs.datadog.tagpass]
     table = ["txhistory"]
 
 [[outputs.datadog]]
+  # an output that forwards all the metrics to DD (except for the ones that are filtered)
+
   # Datadog API key
   apikey = "${DATADOG_API_KEY}"
 
@@ -77,8 +74,17 @@
   fielddrop = ["tcp_established", "tcp_syn_recv", "tcp_none", "udp_socket", "tcp_closing", "tcp_syn_sent", "tcp_fin_wait1", "tcp_close", "tcp_fin_wait2", "tcp_close_wait", "tcp_last_ack", "tcp_time_wait", "inodes_*", "mode", "icmp*", "udplite*", "ip_*", "udp_*", "swap_*","vmalloc_*","huge_page*","page_tables", "write_back*", "committed_as", "slab", "wired", "baseFee", "baseReserve"]
 
   namedrop = ["core_metrics*"] # dont send to dd, as there's so many of these. there are dedicaed outputs for these metrics
+
+###############################################################################
+#                            OUTPUTS FOR THE SLA METRICS                      #
+###############################################################################
  
-[[outputs.kinesis]] # sends the fed-network response-time stats to S3
+[[outputs.kinesis]] 
+   # sends SLA-related metric: horizon_response_time to AWS kinesis. Stored in S3
+   # this is the metric that measures the response time for requests hitting the horizons.
+   # its collected for all the nodes in the fed network.
+   # it requires Kinesis permissions, which are provided via an AWS Role
+
    region = "us-east-1"
    streamname = "SLAMetricsStreamResponseTime"
    data_format = "influx"
@@ -92,42 +98,12 @@
    [outputs.kinesis.partition]
      method = "measurement"
 
- #[[outputs.file]]
-  ## Files to write to, "stdout" is a specially handled file.
-  #files = ["/tmp/metrics.out", "stdout"]
-  #data_format = "influx"
+[[outputs.kinesis]] 
+   # sends SLA-related metric: stellar_core_http* to AWS kinesis. Stored in S3
+   # this is the metric that counts the number of requests hittin the horizon
+   # its collected for all the nodes in the fed network
+   # it requires Kinesis permissions, which are provided via an AWS Role
 
-  #namepass = ["*"]
-  #namepass = ["stellar_core_http*"]
-  #fielddrop = ["tcp_established", "tcp_syn_recv"]
-
-  #tagexclude = ["url", "stellar_network", "host"]
-  #[outputs.file.tagpass]
-  # node_name = ["d491"]
-
-  #fieldpass = ["0.95","0.75"]
-  #tagexclude = ["url","host"]
-  #namepass = ["core_metrics_stellar_database_operations_ms"]
-  #[outputs.file.tagpass]
-    #table = ["txhistory"]
-    #operation = ["insert"]
-
-  #namedrop = ["core_metrics*"] # will drop all metrics from the core's /metrics endpoint
-
-[[outputs.cloudwatch]]
-   ## Amazon REGION
-   region = "us-east-1"
-   access_key = "${AWS_BI_ACCOUNT_ACCESS_KEY}"
-   secret_key = "${AWS_BI_ACCOUNT_SECRET_KEY}"
-   ## Namespace for the CloudWatch MetricDatums
-   namespace = "KinEcosystem/Stats"
-   namepass = ["stellar_core_http*"]
-   fielddrop = ["version", "baseReserve", "baseFee"]
-   tagexclude = ["url", "stellar_network", "host"]
-   [outputs.cloudwatch.tagpass]
-    node_name = ["kin-fed"] # only ship metrics for kin-fed node
-
-[[outputs.kinesis]] # sends the fed-network ledger stats to S3
    region = "us-east-1"
    streamname = "SLAMetricsStreamLedger"
    data_format = "influx"
@@ -142,9 +118,32 @@
     method = "measurement"
 
 ###############################################################################
+#                            OUTPUTS FOR THE BI TEAM                          #
+###############################################################################
+
+[[outputs.cloudwatch]]
+   # sends metrics for the BI Team: used in the Kin site to reflect ledger closing time
+   # this output requires AWS access keys for the BI account which can be found in the 
+   # docker-compose file.
+
+   ## Amazon REGION
+   region = "us-east-1"
+   access_key = "${AWS_BI_ACCOUNT_ACCESS_KEY}"
+   secret_key = "${AWS_BI_ACCOUNT_SECRET_KEY}"
+   ## Namespace for the CloudWatch MetricDatums
+   namespace = "KinEcosystem/Stats"
+   namepass = ["stellar_core_http*"]
+   fielddrop = ["version", "baseReserve", "baseFee"]
+   tagexclude = ["url", "stellar_network", "host"]
+   [outputs.cloudwatch.tagpass]
+    node_name = ["kin-fed"] # only ship metrics for kin-fed node
+
+###############################################################################
 #                                  INPUTS                                     #
 ###############################################################################
 [[inputs.http_listener]]
+  ## This is where all the metrics (from the various federation nodes) enter
+
   ## Address and port to host HTTP listener on
   service_address = ":8086"
 
@@ -172,53 +171,36 @@
   ## Enable TCP keep alive probes (default=false)
   tcp_keep_alive = false
 
-  ## Specifies the keep-alive period for an active network connection.
-  ## Only applies to TCP sockets and will be ignored if tcp_keep_alive is false.
-  ## Defaults to the OS configuration.
-  # tcp_keep_alive_period = "2h"
+###############################################################################
+#                             DEBUG - DISABLED PLUGINS                        #
+###############################################################################
 
-  ## Address and port to host UDP listener on
-  service_address = ":8125"
+ #[[outputs.graphite]] 
+  # disabled. sometimes used by Ami to debug stuff
+  #servers = ["metrics.kininfrastructure.com:2003"]
+  #prefix  = ""
+  #timeout = 10
 
-  ## The following configuration options control when telegraf clears it's cache
-  ## of previous values. If set to false, then telegraf will only clear it's
-  ## cache when the daemon is restarted.
-  ## Reset gauges every interval (default=true)
-  delete_gauges = true
-  ## Reset counters every interval (default=true)
-  delete_counters = true
-  ## Reset sets every interval (default=true)
-  delete_sets = true
-  ## Reset timings & histograms every interval (default=true)
-  delete_timings = true
+ #[[outputs.file]]
+  ## Files to write to, "stdout" is a specially handled file.
+  #files = ["/tmp/metrics.out", "stdout"]
+  #data_format = "influx"
 
-  ## Percentiles to calculate for timing & histogram stats
-  percentiles = [90, 95, 99]
+  #namepass = ["*"]
+  #namepass = ["stellar_core_http*"]
+  #fielddrop = ["tcp_established", "tcp_syn_recv"]
 
-  ## separator to use between elements of a statsd metric
-  metric_separator = "_"
+  #tagexclude = ["url", "stellar_network", "host"]
+  #[outputs.file.tagpass]
+  # node_name = ["d491"]
 
-  ## Parses tags in the datadog statsd format
-  ## http://docs.datadoghq.com/guides/dogstatsd/
-  parse_data_dog_tags = false
+  #fieldpass = ["0.95","0.75"]
+  #tagexclude = ["url","host"]
+  #namepass = ["core_metrics_stellar_database_operations_ms"]
+  #[outputs.file.tagpass]
+    #table = ["txhistory"]
+    #operation = ["insert"]
 
-  ## Statsd data translation templates, more info can be read here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/TEMPLATE_PATTERN.md
-  # templates = [
-  #     "cpu.* measurement*"
-  # ]
-
-  ## Number of UDP messages allowed to queue up, once filled,
-  ## the statsd server will start dropping packets
-  allowed_pending_messages = 10000
-
-  ## Number of timing/histogram values to track per-measurement in the
-  ## calculation of percentiles. Raising this limit increases the accuracy
-  ## of percentiles but also increases the memory usage and cpu time.
-  percentile_limit = 1000
-
-  ## Maximum socket buffer size in bytes, once the buffer fills up, metrics
-  ## will start dropping.  Defaults to the OS default.
-  # read_buffer_size = 65535
+  #namedrop = ["core_metrics*"] # will drop all metrics from the core's /metrics endpoint
 
 # vim: ft=toml
