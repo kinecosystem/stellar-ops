@@ -12,6 +12,7 @@ services:
       NETWORK_NAME: "local"
     links:
       - stellar-core
+      - stellar-core-metrics-exporter
       - telegraf-forwarder
     volumes:
       - ./volumes/stellar-core-telegraf/tmp:/tmp
@@ -33,6 +34,21 @@ services:
     volumes:
       - ./volumes/telegraf-datadog-forwarder/tmp:/tmp
     restart: on-failure
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"
+
+  stellar-core-metrics-exporter:
+    build:
+      dockerfile: Dockerfile
+      context: ./dockerfiles/stellar-core-metrics-exporter
+    links:
+      - stellar-core
+    ports:
+      - 9473:9473
+    restart: always
     logging:
       driver: json-file
       options:
