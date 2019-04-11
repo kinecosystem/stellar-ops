@@ -53,18 +53,43 @@
     operation = ["payment","create-account"]
 
 [[outputs.datadog]]
-  # an output used exclusively for forwarding db metrics of the txhistory table from the cores. 
-  # this includes operations like insert, delete and update (we only care for inserts, really).
-  # with this configuration, all cores will report their local rate, which would allow us to
-  # compare their performance.
+  # an output to explicitly forward specific core metrics
 
   apikey = "${DATADOG_API_KEY}"
-  namepass = ["core_metrics_stellar_database_operations_ms"]
-  fieldpass = ["0.95","0.75"]
-  tagexclude = ["url","host"]
 
-  [outputs.datadog.tagpass]
-    table = ["txhistory"]
+  # see kinecosystem/core/docs/metrics.md for metric description
+  namepass = [
+    "core_metrics_bucket_*",
+
+    "core_metrics_scp_sync_lost_total",
+
+    "core_metrics_herder_pending_txs_age*",
+
+    "core_metrics_history_*",
+    "core_metrics_ledger_*",
+    "core_metrics_app_state_current",
+
+    "core_metrics_overlay_inbound*",
+    "core_metrics_overlay_outbound*",
+    "core_metrics_overlay_connection*",
+    "core_metrics_overlay_error*",
+    "core_metrics_overlay_timeout*",
+
+    "core_metrics_database_*_txhistory_ms",
+
+    "core_metrics_custom_*",
+  ]
+
+  tagexclude = [
+    "url",
+    "host",
+  ]
+
+  fielddrop = [
+    "baseFee",
+    "baseReserve",
+    "version",
+  ]
 
 [[outputs.datadog]]
   # an output that forwards all the metrics to DD (except for the ones that are filtered)
@@ -93,9 +118,6 @@
 
     "tcp_*",
     "udp_*",
-
-    "baseFee",
-    "baseReserve",
   ]
 
   # dont send to datadog, as there's so many of these.

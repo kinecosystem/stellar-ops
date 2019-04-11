@@ -71,7 +71,7 @@
   # HTTP method
   # method = "GET"
 
-  name_prefix = "stellar_core_"
+  name_prefix = "core_metrics_custom_info_ledger_"
 
   data_format = "json"
 
@@ -90,7 +90,7 @@
     "/usr/bin/get-info-quorum.sh -a stellar-core:11626"
   ]
 
-  name_prefix = "stellar_core_"
+  name_prefix = "core_metrics_custom_"
 
   ## Timeout for each command to complete.
   timeout = "5s"
@@ -107,7 +107,7 @@
     "/usr/bin/core-connectivity-check.sh /opt/telegraf/core-connectivity-targets.txt",
   ]
 
-  name_prefix = "stellar_core_"
+  name_prefix = "core_metrics_custom_"
 
   ## Timeout for each command to complete.
   timeout = "5s"
