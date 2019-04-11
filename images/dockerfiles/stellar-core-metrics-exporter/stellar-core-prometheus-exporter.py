@@ -36,6 +36,7 @@ class StellarCoreCollector(object):
         summary = SummaryMetricFamily(underscores, 'libmedida metric type: ' + metrics[k]['type'], count_value=metrics[k]['count'], sum_value=(metrics[k]['mean'] * metrics[k]['count']))
         # add stellar-core calculated quantiles to our summary
         summary.add_sample(underscores, labels={'quantile':'0.75'}, value=metrics[k]['75%'])
+        summary.add_sample(underscores, labels={'quantile':'0.95'}, value=metrics[k]['95%'])
         summary.add_sample(underscores, labels={'quantile':'0.99'}, value=metrics[k]['99%'])
         yield summary
       elif metrics[k]['type'] == 'counter':
