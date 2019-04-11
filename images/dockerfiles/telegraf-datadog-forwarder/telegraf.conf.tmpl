@@ -36,7 +36,6 @@
   # Override default hostname, if empty use os.Hostname()
   hostname = ""
 
-
 ###############################################################################
 #                     OUTPUTS THAT FORWARD METRICS TO DD                      #
 ###############################################################################
@@ -46,10 +45,12 @@
   # from one node's core (I chose the kik node)
   apikey = "${DATADOG_API_KEY}"
   namepass = ["core_metrics_stellar_operations_total"]
+
   [outputs.datadog.tagpass]
-  node_name = ["kikkinfed"]
+    node_name = ["kikkinfed"]
+
   [outputs.datadog.fieldpass]
-  operation = ["payment","create-account"]
+    operation = ["payment","create-account"]
 
 [[outputs.datadog]]
   # an output used exclusively for forwarding db metrics of the txhistory table from the cores. 
@@ -61,6 +62,7 @@
   namepass = ["core_metrics_stellar_database_operations_ms"]
   fieldpass = ["0.95","0.75"]
   tagexclude = ["url","host"]
+
   [outputs.datadog.tagpass]
     table = ["txhistory"]
 
@@ -71,15 +73,41 @@
   apikey = "${DATADOG_API_KEY}"
 
   # drop a whole bunch of tags from various measurements (mem, netstat, disk, net) to save monies
-  fielddrop = ["tcp_established", "tcp_syn_recv", "tcp_none", "udp_socket", "tcp_closing", "tcp_syn_sent", "tcp_fin_wait1", "tcp_close", "tcp_fin_wait2", "tcp_close_wait", "tcp_last_ack", "tcp_time_wait", "inodes_*", "mode", "icmp*", "udplite*", "ip_*", "udp_*", "swap_*","vmalloc_*","huge_page*","page_tables", "write_back*", "committed_as", "slab", "wired", "baseFee", "baseReserve"]
+  fielddrop = [
+    "inodes_*",
+    "mode",
 
-  namedrop = ["core_metrics*"] # dont send to dd, as there's so many of these. there are dedicaed outputs for these metrics
+    "committed_as",
+    "huge_page*",
+    "page_tables",
+    "slab",
+    "swap_*",
+    "vmalloc_*",
+    "wired",
+    "write_back*",
+
+    "icmp*",
+    "ip_*",
+    "udp_*",
+    "udplite*",
+
+    "tcp_*",
+    "udp_*",
+
+    "baseFee",
+    "baseReserve",
+  ]
+
+  # dont send to datadog, as there's so many of these.
+  # there are dedicaed outputs for these metrics
+  namedrop = ["core_metrics*"]
+
 
 ###############################################################################
 #                            OUTPUTS FOR THE SLA METRICS                      #
 ###############################################################################
- 
-[[outputs.kinesis]] 
+
+[[outputs.kinesis]]
    # sends SLA-related metric: horizon_response_time to AWS kinesis. Stored in S3
    # this is the metric that measures the response time for requests hitting the horizons.
    # its collected for all the nodes in the fed network.
@@ -98,7 +126,7 @@
    [outputs.kinesis.partition]
      method = "measurement"
 
-[[outputs.kinesis]] 
+[[outputs.kinesis]]
    # sends SLA-related metric: stellar_core_http* to AWS kinesis. Stored in S3
    # this is the metric that counts the number of requests hittin the horizon
    # its collected for all the nodes in the fed network
@@ -123,7 +151,7 @@
 
 [[outputs.cloudwatch]]
    # sends metrics for the BI Team: used in the Kin site to reflect ledger closing time
-   # this output requires AWS access keys for the BI account which can be found in the 
+   # this output requires AWS access keys for the BI account which can be found in the
    # docker-compose file.
 
    ## Amazon REGION
@@ -141,6 +169,7 @@
 ###############################################################################
 #                                  INPUTS                                     #
 ###############################################################################
+
 [[inputs.http_listener]]
   ## This is where all the metrics (from the various federation nodes) enter
 
@@ -164,32 +193,36 @@
 #                             DEBUG - DISABLED PLUGINS                        #
 ###############################################################################
 
- #[[outputs.graphite]] 
-  # disabled. sometimes used by Ami to debug stuff
-  #servers = ["metrics.kininfrastructure.com:2003"]
-  #prefix  = ""
-  #timeout = 10
+# [[outputs.graphite]]
+#   disabled. sometimes used by Ami to debug stuff
+#   servers = ["metrics.kininfrastructure.com:2003"]
+#   prefix  = ""
+#   timeout = 10
 
- #[[outputs.file]]
-  ## Files to write to, "stdout" is a specially handled file.
-  #files = ["/tmp/metrics.out", "stdout"]
-  #data_format = "influx"
+# [[outputs.file]]
+#   # Files to write to, "stdout" is a specially handled file.
+#   files = ["/tmp/metrics.out", "stdout"]
+#   data_format = "influx"
 
-  #namepass = ["*"]
-  #namepass = ["stellar_core_http*"]
-  #fielddrop = ["tcp_established", "tcp_syn_recv"]
+#   # namepass = ["*"]
+#   namepass = ["stellar_core_http*"]
+#   fielddrop = ["tcp_established", "tcp_syn_recv"]
 
-  #tagexclude = ["url", "stellar_network", "host"]
-  #[outputs.file.tagpass]
-  # node_name = ["d491"]
+#   tagexclude = ["url", "stellar_network", "host"]
 
-  #fieldpass = ["0.95","0.75"]
-  #tagexclude = ["url","host"]
-  #namepass = ["core_metrics_stellar_database_operations_ms"]
-  #[outputs.file.tagpass]
-    #table = ["txhistory"]
-    #operation = ["insert"]
+#   [outputs.file.tagpass]
+#     node_name = ["d491"]
 
-  #namedrop = ["core_metrics*"] # will drop all metrics from the core's /metrics endpoint
+#   fieldpass = ["0.95","0.75"]
+#   tagexclude = ["url","host"]
+#   namepass = ["core_metrics_stellar_database_operations_ms"]
+
+#   [outputs.file.tagpass]
+#     table = ["txhistory"]
+#     operation = ["insert"]
+
+#   # will drop all metrics from the core's /metrics endpoint
+#   # namedrop = ["core_metrics*"]
+
 
 # vim: ft=toml
