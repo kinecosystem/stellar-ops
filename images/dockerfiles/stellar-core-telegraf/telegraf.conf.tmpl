@@ -44,6 +44,10 @@
 
 [[outputs.influxdb]]
   urls = ["http://metrics.kininfrastructure.com:8086"]
+
+  # use this instead for local debug setup
+  # urls = ["http://telegraf-forwarder:8086"]
+
   skip_database_creation = true
 
   ## Timeout for HTTP messages.
@@ -53,7 +57,6 @@
 ###############################################################################
 #                                  INPUTS                                     #
 ###############################################################################
-
 
 [[inputs.http]]
   # this input parses json from http. specifically, it gets the 'info.ledger' field
@@ -65,7 +68,7 @@
     "http://stellar-core:11626/info"
   ]
 
-  ## HTTP method
+  # HTTP method
   # method = "GET"
 
   name_prefix = "stellar_core_"
@@ -121,8 +124,9 @@
 #                             DEBUG OUTPUTS                                   #
 ###############################################################################
 # enable to debug
-#[[outputs.file]]
-#  files = ["/tmp/metrics.out", "stdout"]
-#  data_format = "influx"
+# [[outputs.file]]
+#   files = ["/tmp/metrics.out", "stdout"]
+#   data_format = "influx"
+
 
 # vim: ft=toml
