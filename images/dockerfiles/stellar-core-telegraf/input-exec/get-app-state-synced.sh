@@ -34,4 +34,4 @@ case "$(curl -sS $ADDRESS/metrics | jq -r '.metrics."app.state.current".count')"
     *) state='0' ;;
 esac
 
-printf 'synced synced=%d\n' $state
+printf 'app_state_synced synced=%d\n' $state

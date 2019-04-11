@@ -1,4 +1,6 @@
 #!/bin/bash
+# get core started on date, in order to learn about crashes and restarts
+
 set -e
 
 # argument parsing
@@ -21,11 +23,7 @@ while [[ $# -gt 0 ]]; do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-# BOOTING=0
-# JOIN_SCP=1
-# LEDGER_SYNC=2
-# CATCHING_UP=3
-# SYNCED=4,
-# STOPPING=5
-printf 'state state=%d\n' "$(curl -sS $ADDRESS/metrics | jq -r '.metrics."app.state.current".count')"
+result=$(curl -sS $ADDRESS/info | jq .'info.startedOn' | tr 'T' ' ' | tr -d "\"Z")
+result=$(date -d "$result" +"%s")
 
+printf 'info_started_on time=%s' $result

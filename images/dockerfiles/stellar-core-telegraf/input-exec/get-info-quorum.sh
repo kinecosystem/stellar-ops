@@ -1,5 +1,5 @@
 #!/bin/bash
-# get core started on date, in order to learn about crashes and restarts
+# count how many nodes in the quorum agree and disagree on the last ledger
 
 set -e
 
@@ -23,7 +23,7 @@ while [[ $# -gt 0 ]]; do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-result=$(curl -sS $ADDRESS/info | jq .'info.startedOn' | tr 'T' ' ' | tr -d "\"Z")
-result=$(date -d "$result" +"%s")
-
-printf 'startedOn time=%s' $result
+result=$(curl $ADDRESS/info)
+printf 'info_quorum agree=%d,disagree=%d' \
+    $(echo $result | jq -r '.info.quorum[].agree') \
+    $(echo $result | jq -r '.info.quorum[].disagree')
