@@ -82,6 +82,16 @@
   ##   https://github.com/tidwall/gjson#path-syntax
   json_query = "info.ledger"
 
+[[inputs.http]]
+  # this input fetches the latest ledger that was published to history.
+  # it fetches it from history archive that belongs to the core where this
+  # telegraf agent is running from
+  interval = "10s"
+  urls = [ "$HISTORY_WELL_KNOWN_FILE_URL" ]
+  name_prefix = "core_metrics_custom_history_published_latest_ledger_"
+  data_format = "json"
+  fieldpass = ["currentLedger"]
+
 [[inputs.exec]]
   # This input runs the scripts below which generate various metrics every 5 secs
   commands = [

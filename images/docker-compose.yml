@@ -10,6 +10,7 @@ services:
     environment:
       NODE_NAME: "stellar-core"
       NETWORK_NAME: "local"
+      HISTORY_WELL_KNOWN_FILE_URL: "https://s3.amazonaws.com/MY-CORE-NODE/.well-known/stellar-history.json"
     links:
       - stellar-core
       - stellar-core-metrics-exporter
