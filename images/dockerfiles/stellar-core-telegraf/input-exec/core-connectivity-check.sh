@@ -1,16 +1,12 @@
 #!/bin/bash
-# this script takes a filename of DNS addresses of cores and attempts to create a connection to them. 
-# the retval is the number of unsuccessful connections.
+# this script takes a filename of DNS addresses of cores and attempts to open a TCP socket to them.
+# it prints a metric representing the number of unsuccessful connections.
 
-fail=0
-pass=0
+failed=0
+passed=0
+
 while IFS='' read -r line || [[ -n "$line" ]]; do
-    curl $line:11625 -s --connect-timeout 2 # curl connection timeout (seconds)
-    res=$?
-    if test "$res" != "52"; then
-       ((fail++))
-    else
-       ((pass++))
-    fi
+    if nc -zw 2 $line 11625 ; then ((passed++)) ; else ((failed++)) ; fi
 done < "$1"
-echo 'connectivity_check cores_failed='$fail
+
+printf 'connectivity_check cores_failed=%d\n' $failed
