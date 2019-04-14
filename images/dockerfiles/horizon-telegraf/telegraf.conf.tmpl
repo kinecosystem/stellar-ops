@@ -61,7 +61,7 @@
 
 [[inputs.exec]]
   # runs a script to measture the latency between horizon and its core's /info endpoint
-  commands = [ "/opt/telegraf/scripts/check_latency.sh", ]
+  commands = [ "/opt/telegraf/scripts/check-latency.sh", ]
   name_prefix = "horizon_"
   timeout = "5s"
   data_format = "influx"
@@ -70,7 +70,7 @@
   # every second, sample the ingestion distance at horizon.
   # ingestion distance is the difference between the latest ledger in core
   # and the latest one ingested by horizon
-  commands = [ "/opt/telegraf/scripts/get_ingestion_distance.sh", ]
+  commands = [ "/opt/telegraf/scripts/get-ingestion-distance.sh", ]
   interval = "1s"
   name_prefix = "horizon_"
   # Timeout for each command to complete.

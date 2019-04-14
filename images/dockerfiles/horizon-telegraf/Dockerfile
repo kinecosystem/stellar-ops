@@ -8,8 +8,8 @@ RUN apk add -qU --no-cache curl gettext jq
 COPY ./entrypoint.sh /
 
 RUN mkdir -p /opt/telegraf/scripts
-COPY ./check-latency.sh.tmpl /opt/telegraf/scripts/check_latency.sh.tmpl
-COPY ./get-ingestion-distance.sh /opt/telegraf/scripts/get_ingestion_distance.sh
+COPY ./input-exec/*.sh.tmpl /opt/telegraf/scripts/
+COPY ./input-exec/*.sh /opt/telegraf/scripts/
 
 COPY ./telegraf.conf.tmpl /etc/telegraf/telegraf.conf.tmpl
 
