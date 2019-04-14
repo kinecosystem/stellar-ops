@@ -132,6 +132,28 @@ services:
       POSTGRES_PASSWORD: "12345678"
       POSTGRES_DB: horizon
 
+  horizon-telegraf:
+    build:
+      dockerfile: Dockerfile
+      context: ./dockerfiles/horizon-telegraf
+    environment:
+      NODE_NAME: "horizon"
+      NETWORK_NAME: "local"
+      TARGET_URL: "stellar-core:11626/info"
+      REGION_NAME: "local-region"
+    links:
+      - horizon
+      - stellar-core
+      - telegraf-forwarder
+    volumes:
+      - ./volumes/horizon-telegraf/tmp:/tmp
+    restart: on-failure
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"
+
   stellar-core-build:
     build:
       dockerfile: dockerfiles/Dockerfile.stellar-core-build
