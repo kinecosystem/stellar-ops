@@ -95,9 +95,9 @@
 [[inputs.exec]]
   # This input runs the scripts below which generate various metrics every 5 secs
   commands = [
-    "/usr/bin/get-app-state-synced.sh -a stellar-core:11626",
-    "/usr/bin/get-core-info-started-on.sh -a stellar-core:11626",
-    "/usr/bin/get-info-quorum.sh -a stellar-core:11626"
+    "/usr/bin/get-app-state-synced.sh",
+    "/usr/bin/get-core-info-started-on.sh",
+    "/usr/bin/get-info-quorum.sh"
   ]
 
   name_prefix = "core_metrics_custom_"
