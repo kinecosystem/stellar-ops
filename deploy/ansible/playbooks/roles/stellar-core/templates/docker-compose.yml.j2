@@ -20,6 +20,7 @@ services:
     environment:
       NODE_NAME: "{{stellar_core.network.name}}"
       NETWORK_NAME: "fed"
+      RDS_DB_INSTANCE_IDENTIFIER: "{{this_node.db.name}}"
       HISTORY_WELL_KNOWN_FILE_URL: '{{(stellar_core.nodes|selectattr("name", "equalto", inventory_hostname)|first).archive.get_address}}.well-known/stellar-history.json'
     container_name: stellar_core_telegraf
     links:

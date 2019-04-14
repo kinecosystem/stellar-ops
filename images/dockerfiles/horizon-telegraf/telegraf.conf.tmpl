@@ -139,19 +139,40 @@
   # read_buffer_size = 65535
 
 [[inputs.cloudwatch]]
-  # grab RDS metrics for BOTH horizon and core DBs
-  # TODO: split this into two inputs: one here and another on the core's telegraf
-  # s.t each collects their respective DB metrics in RDS.
+  # grab RDS metrics for Horizon RDS
   region = "${REGION_NAME}"
   period = '1m'
   delay = '5m'
   interval = '5m'
   namespace = 'AWS/RDS'
+
   [[inputs.cloudwatch.metrics]]
-    names = ['DatabaseConnections','CPUUtilization','FreeStorageSpace']
+    names = [
+      'BurstBalance',
+      'CPUUtilization',
+      'DatabaseConnections',
+      'DiskQueueDepth',
+      'FreeableMemory',
+      'FreeStorageSpace',
+      'MaximumUsedTransactionIDs',
+      'NetworkReceiveThroughput',
+      'NetworkTransmitThroughput',
+      'OldestReplicationSlotLag',
+      'ReadIOPS',
+      'ReadLatency',
+      'ReadThroughput',
+      'ReplicationSlotDiskUsage',
+      'SwapUsage',
+      'TransactionLogsDiskUsage',
+      'TransactionLogsGeneration',
+      'WriteIOPS',
+      'WriteLatency',
+      'WriteThroughput',
+    ]
+
     [[inputs.cloudwatch.metrics.dimensions]]
       name = 'DBInstanceIdentifier'
-      value = '*'
+      value = '${RDS_DB_INSTANCE_IDENTIFIER}'
 
 ###############################################################################
 #                             DEBUG OUTPUTS                                   #

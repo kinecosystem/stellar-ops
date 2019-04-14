@@ -10,6 +10,7 @@ services:
       NODE_NAME: "{{stellar_core.network.name}}"
       NETWORK_NAME: fed
       TARGET_URL: "{{this_node.stellar_core.url}}/info"
+      RDS_DB_INSTANCE_IDENTIFIER: "{{this_node.db.name}}"
       REGION_NAME: "{{this_node.aws_region}}"
     network_mode: host
     restart: always

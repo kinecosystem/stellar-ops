@@ -128,6 +128,42 @@
   urls = ["http://stellar-core-metrics-exporter:9473/metrics"]
   name_prefix = "core_metrics_"
 
+[[inputs.cloudwatch]]
+  # grab RDS metrics for Core RDS
+  region = "${REGION_NAME}"
+  period = '1m'
+  delay = '5m'
+  interval = '5m'
+  namespace = 'AWS/RDS'
+
+  [[inputs.cloudwatch.metrics]]
+    names = [
+      'BurstBalance',
+      'CPUUtilization',
+      'DatabaseConnections',
+      'DiskQueueDepth',
+      'FreeableMemory',
+      'FreeStorageSpace',
+      'MaximumUsedTransactionIDs',
+      'NetworkReceiveThroughput',
+      'NetworkTransmitThroughput',
+      'OldestReplicationSlotLag',
+      'ReadIOPS',
+      'ReadLatency',
+      'ReadThroughput',
+      'ReplicationSlotDiskUsage',
+      'SwapUsage',
+      'TransactionLogsDiskUsage',
+      'TransactionLogsGeneration',
+      'WriteIOPS',
+      'WriteLatency',
+      'WriteThroughput',
+    ]
+
+    [[inputs.cloudwatch.metrics.dimensions]]
+      name = 'DBInstanceIdentifier'
+      value = '${RDS_DB_INSTANCE_IDENTIFIER}'
+
 ###############################################################################
 #                             DEBUG OUTPUTS                                   #
 ###############################################################################

@@ -10,6 +10,7 @@ services:
     environment:
       NODE_NAME: "stellar-core"
       NETWORK_NAME: "local"
+      RDS_DB_INSTANCE_IDENTIFIER: "my-rds"
       HISTORY_WELL_KNOWN_FILE_URL: "https://s3.amazonaws.com/MY-CORE-NODE/.well-known/stellar-history.json"
     links:
       - stellar-core
@@ -140,6 +141,7 @@ services:
       NODE_NAME: "horizon"
       NETWORK_NAME: "local"
       TARGET_URL: "stellar-core:11626/info"
+      RDS_DB_INSTANCE_IDENTIFIER: "my-rds"
       REGION_NAME: "local-region"
     links:
       - horizon
