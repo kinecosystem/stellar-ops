@@ -8,7 +8,7 @@ RUN apk add -qU --no-cache curl gettext jq
 COPY ./entrypoint.sh /
 
 # custom telegraf input.exec plugins
-COPY ./input-exec/* /usr/bin/
+COPY ./input-exec/*.sh /usr/bin/
 RUN mkdir -p /opt/telegraf
 COPY ./input-exec/core-connectivity-targets.txt /opt/telegraf
 
