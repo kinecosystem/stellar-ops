@@ -15,4 +15,5 @@ COPY ./input-exec/core-connectivity-targets.txt /opt/telegraf
 # telegraf configuration template
 COPY ./telegraf.conf.tmpl /etc/telegraf/telegraf.conf.tmpl
 
+ENTRYPOINT []
 CMD /entrypoint.sh

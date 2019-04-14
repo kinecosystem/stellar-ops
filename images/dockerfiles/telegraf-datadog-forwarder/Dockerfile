@@ -8,4 +8,5 @@ RUN apk add -qU --no-cache gettext
 COPY ./entrypoint.sh /
 COPY ./telegraf.conf.tmpl /etc/telegraf
 
+ENTRYPOINT []
 CMD /entrypoint.sh
