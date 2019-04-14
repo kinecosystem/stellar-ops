@@ -38,7 +38,6 @@
   # Override default hostname, if empty use os.Hostname()
   hostname = ""
 
-
 ###############################################################################
 #            OUTPUT: SEND EVERYTHING TO THE METRICS-FORWARDERS                #
 ###############################################################################
@@ -53,11 +52,9 @@
   # Timeout for HTTP messages.
   timeout = "5s"
 
-
 ###############################################################################
 #                                  INPUTS                                     #
 ###############################################################################
-
 
 [[inputs.exec]]
   # runs a script to measture the latency between horizon and its core's /info endpoint
@@ -140,7 +137,6 @@
   # will start dropping.  Defaults to the OS default.
   # read_buffer_size = 65535
 
-
 [[inputs.cloudwatch]]
   # grab RDS metrics for BOTH horizon and core DBs
   # TODO: split this into two inputs: one here and another on the core's telegraf
@@ -155,4 +151,15 @@
     [[inputs.cloudwatch.metrics.dimensions]]
       name = 'DBInstanceIdentifier'
       value = '*'
+
+###############################################################################
+#                             DEBUG OUTPUTS                                   #
+###############################################################################
+
+# enable to debug
+# [[outputs.file]]
+#   files = ["/tmp/metrics.out", "stdout"]
+#   data_format = "influx"
+
+
 # vim: ft=toml
