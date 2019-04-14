@@ -1,14 +1,17 @@
 # Horizon telegraf
 
 This is a docker image that collects various measurements from the horizon instance.
-at the moment it collects:
+At the moment it collects:
+
 1. the latency of /info requests from the horizon to its core
 
-In addition, this telegraf also collects statsd metrics from the nginx
+In addition, this telegraf also collects StatsD metrics from the Nginx app running on the Horizon instance.
 
 ## Usage
+
 In docker-compose, add the following service next to the horizon one.
 
+```yaml
 services:
 ---
 version: "3"
@@ -26,6 +29,4 @@ services:
       options:
         max-size: 100m
         max-file: "3"
-
-## TODO
- 
+```
