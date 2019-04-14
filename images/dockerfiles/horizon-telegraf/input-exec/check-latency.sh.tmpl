@@ -1,3 +1,9 @@
 #!/bin/sh
-result=$(curl ${TARGET_URL} -w  %{time_total}|awk '/./{line=$0} END{print line}')
-echo 'latency_to_core time='$result
+# this script measures the response time it took for an HTTP GET request from
+# the horizon instance this telegraf is installed on to its core /info endpoint
+
+set -e
+
+result=$(curl -w %{time_total} -o /dev/null ${TARGET_URL}  | awk '/./{line=$0} END{print line}')
+
+printf 'latency_to_core time=%f\n' $result
