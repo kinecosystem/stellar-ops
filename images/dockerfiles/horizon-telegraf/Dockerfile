@@ -1,4 +1,4 @@
-FROM telegraf:1.9.4-alpine
+FROM telegraf:1.9.5-alpine
 
 EXPOSE 8086
 
