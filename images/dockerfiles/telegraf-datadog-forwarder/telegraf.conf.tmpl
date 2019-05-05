@@ -78,12 +78,36 @@
 ###############################################################################
 #                            OUTPUTS FOR THE SLA METRICS                      #
 ###############################################################################
- 
+ [[outputs.kinesis]] 
+   # sends SLA-related metric: horizon_response_time to AWS kinesis. Stored in S3 and processed by
+   # the BI team using Athena, which can read gzipped files from S3.
+   # this is the metric that measures the response time for requests hitting the horizons.
+   # its collected for all the nodes in both ecosystem and fed networks.
+   # it requires Kinesis permissions, which are provided via an AWS Role
+
+   region = "us-east-1"
+   streamname = "sla-athena-stream-response-time"
+   data_format = "influx"
+   influx_sort_fields = true
+
+   namepass = ["horizon_response_time"]
+   fielddrop = ["stddev", "sum", "mean" ,"upper", "lower", "90_percentile", "70_percentile", "50_percentile", "95_percentile", "host", "node_name"] # we really just care for upper, mean
+   tagexclude = ["metric_type", "request_method", "host", "node_name", "status_code"]
+   [outputs.kinesis.tagpass]
+    request_method = ["POST"]
+
+   [outputs.kinesis.partition]
+     method = "measurement"
+
+
 [[outputs.kinesis]] 
    # sends SLA-related metric: horizon_response_time to AWS kinesis. Stored in S3
    # this is the metric that measures the response time for requests hitting the horizons.
    # its collected for all the nodes in the fed network.
    # it requires Kinesis permissions, which are provided via an AWS Role
+
+   # TODO get rid of this eventually as its no longer needed. After this qurter we can shut this down
+   # and use the output that sends to Athena
 
    region = "us-east-1"
    streamname = "SLAMetricsStreamResponseTime"
