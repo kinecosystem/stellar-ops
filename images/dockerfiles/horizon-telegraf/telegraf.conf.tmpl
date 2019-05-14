@@ -26,7 +26,7 @@
 
   # Default data flushing interval for all outputs. You should not set this below
   # interval. Maximum flush_interval will be flush_interval + flush_jitter
-  flush_interval = "10s"
+  flush_interval = "60s"
   # Jitter the flush interval by a random amount. This is primarily to avoid
   # large write spikes for users running a large number of telegraf instances.
   # ie, a jitter of 5s and interval 10s means flushes will happen every 10-15s
@@ -81,6 +81,10 @@
   protocol = "udp"
   
   name_prefix = "horizon_"
+
+  # aggregate metrics for 60 seconds before sending them
+  # https://github.com/influxdata/telegraf/issues/4694#issuecomment-491972462
+  interval = "60s"
 
   # MaxTCPConnection - applicable when protocol is set to tcp (default=250)
   max_tcp_connections = 250
