@@ -162,7 +162,7 @@ using very limited permissions.
 
 ### Core Ports
 
-Core exposes two ports: P2P (11525) and control (11626).
+Core exposes two ports: P2P (11625) and control (11626).
 
 1. The P2P port should be publicly open.
 1. The control port should be private and accessible only to Core's related Horizon.
