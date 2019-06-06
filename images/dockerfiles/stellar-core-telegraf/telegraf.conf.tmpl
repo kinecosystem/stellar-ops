@@ -97,7 +97,7 @@
   commands = [
     "/usr/bin/get-app-state-synced.sh",
     "/usr/bin/get-core-info-started-on.sh",
-    "/usr/bin/get-info-quorum.sh"
+    "/usr/bin/get-info-quorum.sh",
   ]
 
   name_prefix = "core_metrics_custom_"
@@ -114,6 +114,7 @@
   ## Commands array
   commands = [
     "/usr/bin/core-connectivity-check.sh /opt/telegraf/core-connectivity-targets.txt",
+    "/usr/bin/get-core-db-stats.sh"
   ]
 
   name_prefix = "core_metrics_custom_"
