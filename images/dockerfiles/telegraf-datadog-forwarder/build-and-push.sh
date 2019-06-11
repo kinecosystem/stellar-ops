@@ -1,2 +1,2 @@
-docker build . -t kinecosystem/telegraf-datadog-forwarder:athena-poc
-docker push kinecosystem/telegraf-datadog-forwarder:athena-poc
+docker build . -t kinecosystem/telegraf-datadog-forwarder:metrics-update
+docker push kinecosystem/telegraf-datadog-forwarder:metrics-update

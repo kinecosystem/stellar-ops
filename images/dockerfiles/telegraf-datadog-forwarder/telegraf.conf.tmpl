@@ -44,13 +44,11 @@
   # an output used exclusively for forwarding specific op-counts (like number of payment ops) 
   # from one node's core (I chose the kik node)
   apikey = "${DATADOG_API_KEY}"
-  namepass = ["core_metrics_stellar_operations_total"]
+  namepass = ["core_metrics_op_create_account_*","core_metrics_op_payment_*"]
 
-  [outputs.datadog.tagpass]
+  [outputs.datadog.tagpass] # take only from kik node as this info is global
     node_name = ["kikkinfed"]
 
-  [outputs.datadog.fieldpass]
-    operation = ["payment","create-account"]
 
 [[outputs.datadog]]
   # an output to explicitly forward specific core metrics
