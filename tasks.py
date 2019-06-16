@@ -80,7 +80,7 @@ def init_git_repo(c, git_url, dir_name, repo_name, remote='origin', branch='mast
     # clone git repo if it doesn't exist,
     # otherwise checkout master branch
     if not os.path.isdir('{}/{}/volumes/{}'.format(os.getcwd(), c.cwd, dir_name)):
-        print('Core git repository doesn\'t exist, cloning')
+        print('%s git repository doesn\'t exist, cloning' % repo_name)
         c.run('git clone --branch {branch} {git_url} volumes/{dir_name}'.format(branch=branch, git_url=git_url, dir_name=dir_name))
     else:
         with c.cd('volumes/{}'.format(dir_name)):
