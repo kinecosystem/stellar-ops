@@ -9,9 +9,11 @@ set -e
 # CATCHING_UP=3
 # SYNCED=4,  <-- we care about this
 # STOPPING=5
-case "$(curl -sS http://stellar-core:11626/metrics | jq -r '.metrics."app.state.current".count')" in
-    "4") state='1' ;;
-    *) state='0' ;;
+state="$(curl -sS http://stellar-core:11626/metrics | jq -r '.metrics."app.state.current".count')"
+
+case $state in
+    "4") synced='1' ;;
+    *) synced='0' ;;
 esac
 
-printf 'app_state_synced synced=%d\n' $state
+printf 'app_state_synced synced=%d state=%s\n' $synced $state
