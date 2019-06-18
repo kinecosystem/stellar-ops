@@ -114,7 +114,8 @@
   ## Commands array
   commands = [
     "/usr/bin/core-connectivity-check.sh /opt/telegraf/core-connectivity-targets.txt",
-    "/usr/bin/get-core-db-stats.sh"
+    "/usr/bin/get-core-db-stats.sh",
+    "/usr/bin/get-queued-checkpoints.sh"
   ]
 
   name_prefix = "core_metrics_custom_"
@@ -131,7 +132,7 @@
 
 [[inputs.cloudwatch]]
   # grab RDS metrics for Core RDS
-  region = "${REGION_NAME}"
+  region = "$REGION_NAME"
   period = '1m'
   delay = '5m'
   interval = '5m'
@@ -163,7 +164,7 @@
 
     [[inputs.cloudwatch.metrics.dimensions]]
       name = 'DBInstanceIdentifier'
-      value = '${RDS_DB_INSTANCE_IDENTIFIER}'
+      value = '$RDS_DB_INSTANCE_IDENTIFIER'
 
 ###############################################################################
 #                             DEBUG OUTPUTS                                   #

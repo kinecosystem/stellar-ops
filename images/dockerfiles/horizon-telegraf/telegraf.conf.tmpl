@@ -144,7 +144,7 @@
 
 [[inputs.cloudwatch]]
   # grab RDS metrics for Horizon RDS
-  region = "${REGION_NAME}"
+  region = "$REGION_NAME"
   period = '1m'
   delay = '5m'
   interval = '5m'
@@ -176,7 +176,7 @@
 
     [[inputs.cloudwatch.metrics.dimensions]]
       name = 'DBInstanceIdentifier'
-      value = '${RDS_DB_INSTANCE_IDENTIFIER}'
+      value = '$RDS_DB_INSTANCE_IDENTIFIER'
 
 ###############################################################################
 #                             DEBUG OUTPUTS                                   #
