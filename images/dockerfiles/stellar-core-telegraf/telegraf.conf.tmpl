@@ -57,6 +57,8 @@
 ###############################################################################
 #                                  INPUTS                                     #
 ###############################################################################
+[[inputs.postgresql]]
+  address = "$CORE_DB_URL"
 
 [[inputs.http]]
   # this input parses json from http. specifically, it gets the 'info.ledger' field
