@@ -168,6 +168,10 @@
       name = 'DBInstanceIdentifier'
       value = '$RDS_DB_INSTANCE_IDENTIFIER'
 
+[[inputs.ntpq]]
+  interval = '1m'
+  ## If false, set the -n ntpq flag. Can reduce metric gather times.
+  dns_lookup = false
 ###############################################################################
 #                             DEBUG OUTPUTS                                   #
 ###############################################################################
