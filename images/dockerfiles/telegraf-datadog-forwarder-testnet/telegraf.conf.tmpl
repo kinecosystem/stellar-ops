@@ -37,6 +37,16 @@
   hostname = ""
 
 ###############################################################################
+#                     OUTPUTS THAT FORWARD METRICS TO PROMETHEUS              #
+###############################################################################
+
+[[outputs.prometheus_client]]
+  ## Address to listen on.
+  listen = ":9273"
+  namepass = ["horizon_response_time","horizon_request_count"]
+  collectors_exclude = ["gocollector", "process"]
+
+###############################################################################
 #                     OUTPUTS THAT FORWARD METRICS TO DD                      #
 ###############################################################################
 
