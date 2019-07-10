@@ -1,9 +1,9 @@
-FROM telegraf:1.9.5-alpine
+FROM telegraf:1.11
 
 EXPOSE 8086
 
 # input exec plugin dependencies
-RUN apk add -qU --no-cache curl gettext jq
+RUN apt-get update;apt-get install gettext jq ntp -y
 
 COPY ./entrypoint.sh /
 

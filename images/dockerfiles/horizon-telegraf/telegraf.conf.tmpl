@@ -56,6 +56,10 @@
 ###############################################################################
 #                                  INPUTS                                     #
 ###############################################################################
+[[inputs.ntpq]]
+  interval = '1m'
+  ## If false, set the -n ntpq flag. Can reduce metric gather times.
+  dns_lookup = false
 
 [[inputs.exec]]
   # runs a script to measture the latency between horizon and its core's /info endpoint
