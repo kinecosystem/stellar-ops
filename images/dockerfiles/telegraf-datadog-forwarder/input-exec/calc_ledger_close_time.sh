@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-url="https://horizon-block-explorer.kininfrastructure.com/ledgers?limit=2&order=desc"
+url="http://horizon.kinfederation.com/ledgers?limit=2&order=desc"
 data=$(curl -s "$url")
 ledger0=$(echo "$data" | jq -r "._embedded.records[0].closed_at")
 ledger1=$(echo "$data" | jq -r "._embedded.records[1].closed_at")
