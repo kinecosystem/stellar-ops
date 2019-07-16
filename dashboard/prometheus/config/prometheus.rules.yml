@@ -1,0 +1,11 @@
+groups:
+  - name: horizon_fed_stats_rules
+    rules:
+      - record: horizon_total_requests_post_200_fed
+        expr: sum(horizon_request_count{request_method="POST",status_code="200",stellar_network="fed"})
+      - record: horizon_total_requests_get_200_fed
+        expr: sum(horizon_request_count{request_method="GET",status_code="200",stellar_network="fed"})
+      - record: horizon_avg_response_time_post_200_fed
+        expr: avg(horizon_response_time_90_percentile{status_code="200",request_method="POST",stellar_network="fed"})/1000
+      - record: horizon_avg_response_time_get_200_fed
+        expr: avg(horizon_response_time_90_percentile{status_code="200",request_method="GET",stellar_network="fed"})/1000

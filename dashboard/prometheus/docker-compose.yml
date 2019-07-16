@@ -1,0 +1,17 @@
+version: "3"
+services:
+  prometheus:
+    image: prom/prometheus:v2.11.0
+    container_name: prometheus
+    ports:
+       - 9090:9090
+    restart: always
+    volumes:
+       - /opt/prometheus/data:/prometheus
+       - /opt/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+       - /opt/prometheus/prometheus.rules.yml:/etc/prometheus/prometheus.rules.yml
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"

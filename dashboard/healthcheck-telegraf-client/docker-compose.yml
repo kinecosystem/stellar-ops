@@ -1,0 +1,18 @@
+version: "3"
+services:
+  telegraf:
+    image: kinecosystem/blockchain-healthcheck-telegraf:v1.0.0
+    ports:
+     - "9273:9273"
+    environment:
+      REGION_NAME: eu-central-1
+      NODE_NAME: blockchain-healthchec-frank
+      NETWORK_NAME: fed
+    container_name: blockchain-healthcheck-telegraf
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"
+        max-size: 100m
