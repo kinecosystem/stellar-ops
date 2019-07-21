@@ -1,0 +1,15 @@
+  filebeat:
+    image: kinecosystem/filebeat-for-docker-logs:v1.0.0
+    container_name: filebeat
+    restart: always
+    environment:
+      NODE_NAME: kin-fed-2
+      NETWORK_NAME: fed
+      LOGSTASH_HOST: "xx.xx.xx.xx:5044"
+    volumes:
+    - /var/lib/docker/containers:/var/lib/docker/containers:rw
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"  
