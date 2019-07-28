@@ -1,0 +1,66 @@
+version: "3"
+services:
+  stellar-core-db:
+    image: postgres:10-alpine
+    container_name: stellar_core_db
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+    environment:
+      POSTGRES_USER: stellar
+      POSTGRES_PASSWORD: "G17WAqXN7nH0xXWs"
+      POSTGRES_DB: core
+    ports:
+      - 5432:5432
+    volumes:
+      - /data/postgresql/data:/var/lib/postgresql/data
+      - /var/run/postgresql:/var/run/postgresql
+      - /data/volumes/stellar-core-db/etc/postgresql/postgresql.conf:/etc/postgresql/postgresql.conf
+    restart: always
+  stellar-core:
+    image: kinecosystem/stellar-core:kinecosystem-v2.1.0-stellar-v9.2.0
+    container_name: stellar_core
+    ports:
+      - 11625:11625
+      - 11626:11626
+    volumes:
+      - /var/run/postgresql:/var/run/postgresql
+      - /data/stellar-core:/opt/stellar-core
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"
+    depends_on:
+      - stellar-core-db
+    links:
+      - "stellar-core-db:stellar-core-nw"
+  stellar-core-metrics-exporter:
+    image: kinecosystem/stellar-core-metrics-exporter:v1.0.1
+    container_name: stellar_core_metrics_exporter
+    links:
+    - stellar-core:stellar-core
+    restart: always
+    ports:
+    - 9473:9473
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+  stellar-core-telegraf:
+    image: kinecosystem/stellar-core-telegraf-test-env:v1.0.0
+    environment:
+      NODE_NAME: base-watcher
+      NETWORK_NAME: fed
+      CORE_DB_URL: "postgres://stellar:G17WAqXN7nH0xXWs@stellar-core-db/core?sslmode=disable"
+      REGION_NAME: "us-east-1"
+      RDS_DB_INSTANCE_IDENTIFIER: "no-rds"
+    container_name: stellar_core_telegraf
+    links:
+    - stellar-core:stellar-core
+    - stellar-core-metrics-exporter:stellar-core-metrics-exporter
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"

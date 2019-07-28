@@ -1,0 +1,89 @@
+version: "3"
+services:
+  horizon:
+    depends_on: [horizon-db]
+    image: kinecosystem/horizon:kinecosystem-v2.0.0-stellar-v0.16.1
+    container_name: horizon
+    network_mode: host  # listens on port 8000
+    volumes:
+            - /data/horizon-volumes/volumes/horizon:/opt/horizon
+            - /var/run/postgresql:/var/run/postgresql
+    environment:
+      DATABASE_URL: "dbname=XXXXXX user=XXXXXX host=/var/run/postgresql password=XXXXXX"
+      HORIZON_DB_MAX_OPEN_CONNECTIONS: "24"
+      STELLAR_CORE_DATABASE_URL: "postgres://XXXXXX:XXXXXX@XXXXXX?sslmode=disable"
+      STELLAR_CORE_URL: "http://XXXXXX:XXXXXX"
+      LOG_LEVEL: "warn"
+      INGEST: "true"
+      PER_HOUR_RATE_LIMIT: "10000000"
+      HISTORY_RETENTION_COUNT: "90000"
+      NETWORK_PASSPHRASE: "XXXXXX"
+      FRIENDBOT_URL: ''
+      CURSOR_NAME: "XXXXXX"
+    restart: "no"
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"
+  horizon-db:
+    image: postgres:10-alpine
+    environment:
+      POSTGRES_USER: XXXXXX
+      POSTGRES_PASSWORD: "XXXXXX"
+      POSTGRES_DB: XXXXXX
+    ports:
+      - 5432:5432
+    volumes:
+      - /data/postgresql/data:/var/lib/postgresql/data
+      - /var/run/postgresql:/var/run/postgresql
+  horizon-health-check:
+    command: pipenv run gunicorn -b 0.0.0.0:8001 main:APP
+    image: kinecosystem/horizon-health-check:v1.0.1
+    container_name: horizon-health-check
+    network_mode: host
+    environment:
+      BUILD_VERSION: a25eb1c
+      REQUEST_TIMEOUT: 2
+      CORE_INFO_URL: http://XXXXXX:XXXXXX/info
+      HORIZON_INFO_URL: http://localhost:80/
+    restart: "no"
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"
+  horizon-telegraf:
+    image: kinecosystem/horizon-telegraf:v1.0.25
+    container_name: horizon-telegraf
+    environment:
+      NODE_NAME: "XXXXXX"
+      NETWORK_NAME: fed
+      TARGET_URL: "http://XXXXXX:XXXXXX/info"
+      REGION_NAME: "XXXXXX"
+      RDS_DB_INSTANCE_IDENTIFIER: "horizon-kin-test"
+    network_mode: host
+    restart: "no"
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"
+  horizon-nginx-proxy:
+    image: kinecosystem/horizon-nginx-statsd:v1.0.7
+    container_name: horizon-nginx-proxy
+    network_mode: host
+    environment:
+      STATSD_SAMPLE_RATE_PERCENT: 100
+      NODE_NAME: kin-fed
+      PROXY_LISTEN_PORT: 80
+      PROXY_READ_TIMEOUT: 900
+      # horizon listens on port 8000
+      PROXY_PASS_URL: http://localhost:8000
+      HOST: "XXXXXX"
+    restart: "no"
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+        max-file: "3"
