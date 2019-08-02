@@ -200,7 +200,7 @@ $ docker run --rm -it \
 $ docker run -it --rm \
     -v "/str:/opt/stellar" \
     --name stellar \
-    kineosystem/blockchain-quickstart --mainnet
+    kinecosystem/blockchain-quickstart --mainnet
 ```
 
 *Start a background persistent container for an already initialized host directory:*
@@ -209,5 +209,5 @@ $ docker run -d \
     -v "/str:/opt/stellar" \
     -p "8000:8000" \
     --name stellar \
-    kineosystem/blockchain-quickstart --mainnet
+    kinecosystem/blockchain-quickstart --mainnet
 ```
