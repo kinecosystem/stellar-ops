@@ -22,19 +22,25 @@ http {
   access_log /dev/stdout;
   error_log /dev/stderr;
 
+  # track requests with sse headers using the http_accpet variable
+  map $http_accept $header_accept {
+    default "";
+    "text/event-stream" "sse";
+  }
+
   server {
     listen ${PROXY_LISTEN_PORT};
 
     proxy_read_timeout ${PROXY_READ_TIMEOUT};
 
     location / {
-      statsd_count "request_count.$request_method.$status.${NODE_NAME}" 1;
+      statsd_count "request_count.$request_method.$header_accept.$status.${NODE_NAME}" 1;
       # http://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive
       proxy_http_version 1.1;
       proxy_set_header Connection "";
       proxy_set_header Host   ${HOST};
       proxy_pass ${PROXY_PASS_URL};
-      statsd_timing "response_time.$request_method.$status.${NODE_NAME}" "$upstream_response_time";
+      statsd_timing "response_time.$request_method.$header_accept.$status.${NODE_NAME}" "$upstream_response_time";
 
       # if the request is for sse, return 200 instead of 504
       #

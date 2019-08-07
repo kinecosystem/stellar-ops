@@ -122,8 +122,8 @@
   # Statsd data translation templates, more info can be read here:
   # https://github.com/influxdata/telegraf/blob/master/docs/TEMPLATE_PATTERN.md
   templates = [
-       "request_count.* measurement.request_method.status_code.node_name",
-       "response_time.* measurement.request_method.status_code.node_name",
+       "request_count.* measurement.request_method.header_accept.status_code.node_name",
+       "response_time.* measurement.request_method.header_accept.status_code.node_name",
   ]
 
   # Number of UDP messages allowed to queue up, once filled,
