@@ -1,6 +1,8 @@
 groups:
   - name: horizon_fed_stats_rules
     rules:
+      - record: health_check_average_by_server
+        expr: avg(http_response_response_time)by(server)
       - record: horizon_total_requests_post_200_fed
         expr: sum(horizon_request_count{request_method="POST",status_code="200",stellar_network="fed"})
       - record: horizon_total_requests_get_200_fed
@@ -10,12 +12,12 @@ groups:
       - record: horizon_avg_response_time_post_200_fed_90p
         expr: avg(horizon_response_time_90_percentile{status_code="200",request_method="POST",stellar_network="fed"})/1000
       - record: horizon_avg_response_time_get_200_fed_90p
-        expr: avg(horizon_response_time_90_percentile{status_code="200",request_method="GET",stellar_network="fed"})/1000
+        expr: avg(horizon_response_time_90_percentile{status_code="200",request_method="GET",stellar_network="fed", header_accept="other"})/1000
       - record: horizon_avg_response_time_post_200_fed_99p
         expr: avg(horizon_response_time_99_percentile{status_code="200",request_method="POST",stellar_network="fed"})/1000
       - record: horizon_avg_response_time_get_200_fed_99p
-        expr: avg(horizon_response_time_99_percentile{status_code="200",request_method="GET",stellar_network="fed"})/1000
+        expr: avg(horizon_response_time_99_percentile{status_code="200",request_method="GET",stellar_network="fed", header_accept="other"})/1000
       - record: horizon_avg_response_time_post_200_fed_70p
         expr: avg(horizon_response_time_70_percentile{status_code="200",request_method="POST",stellar_network="fed"})/1000
       - record: horizon_avg_response_time_get_200_fed_70p
-        expr: avg(horizon_response_time_70_percentile{status_code="200",request_method="GET",stellar_network="fed"})/1000
+        expr: avg(horizon_response_time_70_percentile{status_code="200",request_method="GET",stellar_network="fed", header_accept="other"})/1000
