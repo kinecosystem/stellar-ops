@@ -17,4 +17,4 @@ WORKDIR /opt/stellar-core
 EXPOSE 11625 11626
 ENTRYPOINT ["/usr/local/bin/stellar-core"]
 
-COPY ./volumes/stellar-core-git/src/stellar-core /usr/local/bin/
+COPY ./volumes/core-git/src/stellar-core /usr/local/bin/

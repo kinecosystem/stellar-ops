@@ -124,7 +124,7 @@ def build_core(c, version, org_name='kinecosystem', repo_name='core', remote='or
                   '.'.format(org_name=org_name))
 
             c.run('sudo docker run --rm '
-                  '-v {cwd}/{pwd}/volumes/{dir_name}:/{repo_name} '
+                  '-v {cwd}/{pwd}/volumes/{dir_name}:/stellar-core '
                   '{org_name}/stellar-core-build'.format(
                       cwd=os.getcwd(),
                       pwd=c.cwd,
